@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Η Πόλη του Κωνσταντίνου</title>
+<meta name="theme-color" content="#1b4965">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Πόλη">
+<style>
+  :root{
+    --navy:#1b4965; --navy2:#12324a; --sea:#4aa3c8; --sand:#f4ead2; --paper:#fff8e6; --ink:#2a2118; --dim:#7a6a52;
+    --gold:#e0a82e; --red:#b5523b; --good:#2e9e5b; --bad:#d9622b; --stone:#d8cfc0; --lt:#e8f1f6;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  [hidden]{display:none !important}
+  html,body{height:100%}
+  body{font-family:Comfortaa,"Noto Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--navy2);color:var(--ink);overflow:hidden;overscroll-behavior:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  button{touch-action:manipulation;font:inherit;cursor:pointer;border:0;color:inherit}
+  #app{position:fixed;inset:0}
+  .screen{position:absolute;inset:0;display:none;flex-direction:column}
+  .screen.on{display:flex}
+  /* ---- αρχική ---- */
+  #home{background:linear-gradient(180deg,#2c6e91 0,#4aa3c8 38%,var(--sand) 38.1%,var(--sand) 100%);overflow-y:auto;-webkit-overflow-scrolling:touch;
+    padding:calc(14px + env(safe-area-inset-top,0px)) calc(16px + env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) calc(16px + env(safe-area-inset-left,0px));align-items:center}
+  #home .wrap{width:100%;max-width:460px;display:flex;flex-direction:column;gap:12px}
+  .logo{text-align:center;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.25);padding-top:6px}
+  .logo h1{font-size:26px;line-height:1.15}
+  .logo p{font-size:13px;opacity:.95;margin-top:4px}
+  .heroCity{background:#a6d9ef;border-radius:18px;overflow:hidden;border:3px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+  .heroCity svg{display:block;width:100%;height:auto}
+  .btn{min-height:52px;border-radius:16px;padding:12px 16px;font-weight:700;font-size:16px;background:var(--navy);color:#fff;box-shadow:0 4px 0 var(--navy2);display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+  .btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--navy2)}
+  .btn.gold{background:var(--gold);color:#3a2a05;box-shadow:0 4px 0 #a97a14}
+  .btn.ghost{background:#fff;color:var(--navy);box-shadow:0 4px 0 #c5cfd6}
+  .btn[disabled]{opacity:.45}
+  .btn small{font-weight:400;font-size:12px;opacity:.85}
+  .row{display:flex;gap:10px}
+  .row .btn{flex:1}
+  .how{background:#fff;border-radius:14px;padding:12px 14px;font-size:13.5px;line-height:1.5;color:var(--ink)}
+  .how summary{font-weight:700;min-height:32px;display:flex;align-items:center;cursor:pointer}
+  .how ol{margin:6px 0 0 18px}
+  .rec{font-size:12.5px;color:var(--dim);text-align:center}
+  /* ---- παιχνίδι ---- */
+  #game{background:var(--navy2)}
+  .hud{flex:0 0 auto;display:flex;align-items:center;gap:8px;color:#fff;background:var(--navy);
+    padding:calc(6px + env(safe-area-inset-top,0px)) calc(10px + env(safe-area-inset-right,0px)) 6px calc(10px + env(safe-area-inset-left,0px));font-size:14px;font-weight:700}
+  .hud .yr{flex:1;min-width:0}
+  .hud .yr b{font-size:16px}
+  .dots{display:flex;gap:4px;margin-top:3px}
+  .dots i{width:14px;height:5px;border-radius:3px;background:rgba(255,255,255,.3)}
+  .dots i.on{background:var(--gold)}
+  .chip{background:rgba(255,255,255,.14);border-radius:12px;padding:5px 9px;white-space:nowrap}
+  .ib{min-width:44px;min-height:44px;border-radius:12px;background:rgba(255,255,255,.14);color:#fff;font-size:18px}
+  #stage{flex:0 0 auto;position:relative;background:#a6d9ef}
+  #stage svg{display:block;width:100%;height:auto;max-height:36dvh}
+  #panel{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--paper);border-radius:18px 18px 0 0;margin-top:-4px;position:relative;z-index:2;
+    padding:14px calc(14px + env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) calc(14px + env(safe-area-inset-left,0px));box-shadow:0 -6px 18px rgba(0,0,0,.25)}
+  .pwrap{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+  .say{display:flex;gap:10px;align-items:flex-start}
+  .say svg{flex:0 0 52px;width:52px;height:44px}
+  .bubble{background:#fff;border:2px solid var(--stone);border-radius:14px;padding:9px 12px;font-size:14px;line-height:1.4;flex:1}
+  .tag{display:inline-block;font-size:11px;font-weight:700;background:var(--navy);color:#fff;border-radius:8px;padding:2px 7px;margin-left:4px;vertical-align:1px}
+  .tag.ch{background:#8a6a3a}
+  h2.q{font-size:17px;line-height:1.35}
+  .opt{min-height:52px;width:100%;text-align:left;background:#fff;border:2px solid var(--stone);border-radius:14px;padding:10px 12px;font-size:14.5px;line-height:1.35;box-shadow:0 3px 0 var(--stone)}
+  .opt:active{transform:translateY(2px)}
+  .opt.best{background:#dff5e6;border-color:var(--good)}
+  .opt.wrong{background:#ffe8da;border-color:var(--bad)}
+  .opt[disabled]{opacity:1}
+  .expl{background:#fff3cf;border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.45;border-left:5px solid var(--gold)}
+  .gain{font-weight:700;color:var(--good)}
+  .gain.low{color:var(--bad)}
+  .fact{background:#e5f3fb;border-left:5px solid var(--sea);border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.45;animation:pop .35s ease-out}
+  .bl{display:flex;align-items:center;gap:10px;width:100%;min-height:54px;background:#fff;border:2px solid var(--stone);border-radius:14px;padding:6px 12px;text-align:left;box-shadow:0 3px 0 var(--stone)}
+  .bl .ic{font-size:24px;flex:0 0 32px;text-align:center}
+  .bl .nm{flex:1;font-size:14px;font-weight:700;line-height:1.25}
+  .bl .nm small{display:block;font-weight:400;color:var(--dim);font-size:11.5px}
+  .bl .co{font-weight:700;color:var(--navy);white-space:nowrap}
+  .bl.ok{border-color:var(--good)}
+  .bl.off{opacity:.55}
+  .bl.done{background:#dff5e6;opacity:1}
+  .evcard{background:#fff;border:3px solid var(--gold);border-radius:18px;padding:16px;text-align:center;box-shadow:0 6px 0 #c99a2a;display:flex;flex-direction:column;gap:8px;align-items:center}
+  .evcard .big{font-size:46px;line-height:1}
+  .evcard h3{font-size:19px}
+  .evcard.back{background:var(--navy);color:#fff;border-color:#fff;box-shadow:0 6px 0 var(--navy2);min-height:150px;justify-content:center}
+  .evcard.good{border-color:var(--good);box-shadow:0 6px 0 #1f7a44}
+  .evcard.bad{border-color:var(--bad);box-shadow:0 6px 0 #a24716}
+  .tmr{height:10px;border-radius:5px;background:#e3d9c0;overflow:hidden;width:100%}
+  .tmr i{display:block;height:100%;background:var(--good);width:100%;transition:width .1s linear}
+  .tmr.low i{background:var(--bad)}
+  .flames{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+  .flame{min-height:64px;font-size:34px;background:#fff0e0;border-radius:14px;border:2px solid #f5c79a}
+  .flame.out{background:#e3f1fb;border-color:#9bd0ee}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .stat{background:#fff;border-radius:12px;padding:8px 10px;font-size:13px;border:2px solid var(--stone)}
+  .stat b{display:block;font-size:19px}
+  .stars{font-size:34px;color:var(--gold);text-align:center;letter-spacing:4px}
+  .stars .off{color:#d6cfbd}
+  .epi{display:flex;flex-direction:column;gap:8px;border-left:4px solid var(--navy);padding-left:10px}
+  .epi div{font-size:13.5px;line-height:1.4}
+  .epi b{color:var(--navy)}
+  /* ήχος/toast */
+  #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:rgba(18,50,74,.95);color:#fff;border-radius:14px;padding:10px 16px;font-size:13.5px;z-index:50;max-width:88%;text-align:center;pointer-events:none;opacity:0;transition:opacity .2s}
+  #toast.on{opacity:1}
+  #pause{position:fixed;inset:0;background:rgba(18,50,74,.88);z-index:60;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:#fff;font-size:22px;font-weight:700}
+  #pause .btn{width:auto;padding:12px 28px}
+  /* ---- SVG ---- */
+  .sky{fill:#a6d9ef}.sea{fill:#4aa3c8}.ground{fill:#9cc774}.hillc{fill:#86b564}.sun{fill:#fbd24d}
+  svg.night .sky{fill:#0f2236}svg.night .sea{fill:#1d4a6e}svg.night .ground{fill:#3f6b50}svg.night .hillc{fill:#365f46}svg.night .sun{fill:#f4efd0}
+  svg.night .stars{opacity:1}
+  .nstars{opacity:0}svg.night .nstars{opacity:1}
+  .bld{transform-box:fill-box;transform-origin:50% 100%}
+  .bld.pop{animation:pop .5s ease-out}
+  @keyframes pop{0%{transform:scale(.2);opacity:0}70%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}
+  .scaf line,.scaf rect{stroke:#8a5a2b;stroke-width:1.6;fill:none}
+  .wave{animation:wv 3s ease-in-out infinite alternate}
+  @keyframes wv{from{transform:translateX(-3px)}to{transform:translateX(3px)}}
+  .fw circle{transform-box:fill-box;transform-origin:center;animation:fw 1.8s ease-out infinite;opacity:0}
+  @keyframes fw{0%{transform:scale(.1);opacity:1}80%{opacity:.9}100%{transform:scale(1);opacity:0}}
+  .shake{animation:shk .35s}
+  @keyframes shk{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+  .catwrap{--eo:inline;--es:none;--ep:none;--zz:none}
+  .catwrap.sleep{--eo:none;--es:inline;--zz:inline}
+  .catwrap.panic{--eo:none;--ep:inline}
+  .eo{display:var(--eo)}.es{display:var(--es)}.ep{display:var(--ep)}.zz{display:var(--zz)}
+  .catwrap.panic .catbody{animation:shk .3s infinite}
+  .tail{transform-box:fill-box;transform-origin:0% 100%;animation:tl 1.6s ease-in-out infinite alternate}
+  @keyframes tl{from{transform:rotate(-10deg)}to{transform:rotate(14deg)}}
+  .sprop{cursor:pointer}
+  .sprop.found circle{stroke:#2e9e5b;stroke-width:3;fill:rgba(46,158,91,.25)}
+  .sprop.reveal circle{stroke:#d9622b;stroke-width:3;fill:rgba(217,98,43,.2)}
+  @media (max-height:640px){#stage svg{max-height:30dvh}.logo h1{font-size:22px}}
+  @media (prefers-reduced-motion:reduce){*{animation:none !important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="cat" viewBox="0 0 60 48">
+    <g class="catbody">
+      <path class="tail" d="M46 38 C58 38 60 26 54 22" stroke="#e8933a" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <ellipse cx="30" cy="36" rx="19" ry="11" fill="#f0a24a"/>
+      <path d="M20 30 l4 5 M28 28 l1 6 M36 29 l-1 6" stroke="#c97424" stroke-width="2.2" stroke-linecap="round"/>
+      <circle cx="19" cy="21" r="11" fill="#f0a24a"/>
+      <polygon points="10,14 11,3 18,10" fill="#f0a24a"/><polygon points="28,14 27,3 20,10" fill="#f0a24a"/>
+      <polygon points="12,12 12.5,6 16,10" fill="#f6c7a0"/><polygon points="26,12 25.5,6 22,10" fill="#f6c7a0"/>
+      <g class="eo"><circle cx="15" cy="21" r="2" fill="#2a2118"/><circle cx="23" cy="21" r="2" fill="#2a2118"/></g>
+      <g class="es"><path d="M13 21 q2 2 4 0 M21 21 q2 2 4 0" stroke="#2a2118" stroke-width="1.6" fill="none" stroke-linecap="round"/></g>
+      <g class="ep"><circle cx="15" cy="21" r="3.2" fill="#fff" stroke="#2a2118"/><circle cx="23" cy="21" r="3.2" fill="#fff" stroke="#2a2118"/><circle cx="15" cy="21" r="1.2" fill="#2a2118"/><circle cx="23" cy="21" r="1.2" fill="#2a2118"/></g>
+      <polygon points="19,25 17.5,23.5 20.5,23.5" fill="#d9622b"/>
+      <path d="M19 25 v2 M16 27 q3 2 6 0" stroke="#2a2118" stroke-width="1.2" fill="none"/>
+      <text class="zz" x="32" y="12" font-size="9" font-weight="700" fill="#fff">z</text>
+    </g>
+  </symbol>
+</svg>
+<div id="app">
+  <!-- ======= ΑΡΧΙΚΗ ======= -->
+  <section id="home" class="screen on">
+    <div class="wrap">
+      <div class="logo"><h1>🏛️ Η Πόλη του Κωνσταντίνου</h1><p>Χτίσε τη Νέα Ρώμη, 324–330 μ.Χ. Ιστορία Ε΄ · Ενότητα Β΄</p></div>
+      <div class="heroCity" id="heroCity"></div>
+      <button class="btn gold" id="bResume" hidden></button>
+      <button class="btn" id="bNew">Χτίσ’ τη! 🏛️ <small>νέα εκστρατεία</small></button>
+      <div class="row">
+        <button class="btn ghost" id="bSprint">⚡ Γρήγορη Επιθεώρηση</button>
+        <button class="btn ghost" id="bView">🌇 Δες την Πόλη σου</button>
+      </div>
+      <button class="btn ghost" id="bSound">🔊 Ήχος</button>
+      <div class="rec" id="recLine"></div>
+      <details class="how"><summary>Πώς παίζεται</summary>
+        <ol>
+          <li><b>Συμβούλιο:</b> απάντησε στα διλήμματα του αυτοκράτορα· η σωστή απόφαση φέρνει περισσότερα σολδία.</li>
+          <li><b>Εργοτάξιο:</b> ξόδεψε σολδία για να χτίσεις (έως 2 κτίρια τη χρονιά). Η Πόλη μεγαλώνει στην οθόνη!</li>
+          <li><b>Κάρτα Απρόοπτου:</b> κάθε χρονιά τραβάς μία. Εξαρτάται από ό,τι έχεις χτίσει!</li>
+          <li>Ανάμεσα σε χρονιές: «Τι δεν ταιριάζει;» — βρες το αντικείμενο που δεν ανήκει στην εποχή.</li>
+          <li>Στόχος: τα εγκαίνια, Μάιο του 330. Η εκστρατεία σώζεται αυτόματα.</li>
+        </ol></details>
+    </div>
+  </section>
+  <!-- ======= ΠΑΙΧΝΙΔΙ ======= -->
+  <section id="game" class="screen">
+    <div class="hud">
+      <button class="ib" id="bHome" aria-label="Αρχική">⌂</button>
+      <div class="yr"><b id="hYear">324 μ.Χ.</b><div class="dots" id="hDots"></div></div>
+      <div class="chip" id="hSold">🪙 0</div>
+      <div class="chip" id="hMed">🏅 0</div>
+      <button class="ib" id="bSnd" aria-label="Ήχος">🔊</button>
+    </div>
+    <div id="stage"></div>
+    <div id="panel"><div class="pwrap" id="pw"></div></div>
+  </section>
+</div>
+<div id="toast"></div>
+<div id="pause" hidden><div>⏸ Παύση</div><button class="btn gold" id="bResumeT">Συνέχεια</button></div>
+<script id="logic">
+/* ===== Η Πόλη του Κωνσταντίνου — καθαρή λογική (χωρίς DOM) =====
+   Πηγή ΟΛΩΝ των ιστορικών στοιχείων: Ιστορία Ε΄, Ενότητες Α΄–Β΄, κεφ. 1–12.
+   Τα «ch» είναι αριθμοί κεφαλαίου του βιβλίου. */
+const YEARS = [324, 325, 326, 327, 328, 329, 330];
+const BASE_INCOME = 20, START_SOLDIA = 60, GAIN_BEST = 30, GAIN_WRONG = 8, MAX_BUILDS_PER_YEAR = 2;
+const SCENE_AFTER = [1, 3, 5];          // μετά από ποιες χρονιές (δείκτες) μπορεί να έρθει «Τι δεν ταιριάζει;»
+const ANACH_BONUS = 20, MEDAL_VALUE = 30, STATE_VERSION = 1;
+
+/* ---- Κτίρια (σειρά σχεδίου: τείχη → φόρουμ & κίονας → ναοί → νερό → παλάτι → ιππόδρομος) ---- */
+const BUILDINGS = [
+  { id: 'walls',      name: 'Τείχη',                 icon: '🧱', cost: 50, after: [],            ch: 7 },
+  { id: 'forum',      name: 'Φόρουμ του Κωνσταντίνου', icon: '🏛️', cost: 45, after: ['walls'],     ch: 7 },
+  { id: 'column',     name: 'Κίονας με άγαλμα',      icon: '🧍', cost: 30, after: ['forum'],     ch: 7 },
+  { id: 'eirene',     name: 'Αγία Ειρήνη',           icon: '⛪', cost: 40, after: ['forum'],     ch: 7 },
+  { id: 'sophia',     name: 'Αγία Σοφία',            icon: '🕌', cost: 55, after: ['eirene'],    ch: 7 },
+  { id: 'apostles',   name: 'Άγιοι Απόστολοι',       icon: '✝️', cost: 45, after: ['eirene'],    ch: 7 },
+  { id: 'aqueduct',   name: 'Υδραγωγείο',            icon: '💧', cost: 50, after: ['forum'],     ch: 7 },
+  { id: 'cisterns',   name: 'Δεξαμενές',             icon: '🪣', cost: 40, after: ['aqueduct'],  ch: 7 },
+  { id: 'palace',     name: 'Μέγα Παλάτι',           icon: '👑', cost: 60, after: ['walls'],     ch: 10 },
+  { id: 'hippodrome', name: 'Ιππόδρομος',            icon: '🏇', cost: 60, after: ['palace'],    ch: 10 }
+];
+const B = {}; BUILDINGS.forEach(b => B[b.id] = b);
+
+/* ---- «Ήξερες ότι…;» — κάθε γεγονός με αριθμό κεφαλαίου ---- */
+const FACTS = [
+  { id: 'f-walls',  b: 'walls',  ch: 7,  t: 'Ο Κωνσταντίνος επισκεύασε την ακρόπολη και τα παλιά τείχη, έχτισε και νέα, και αντάμειψε όσους τα φύλαγαν.' },
+  { id: 'f-walls2', b: null,     ch: 9,  t: 'Αργότερα, στην Ανατολή, χτίστηκαν διπλά χερσαία τείχη γύρω από την Κωνσταντινούπολη.' },
+  { id: 'f-forum',  b: 'forum',  ch: 11, t: 'Το Φόρουμ του Κωνσταντίνου βρισκόταν στη Μέση λεωφόρο. Οι αγορές ήταν τόποι συνάντησης, με στοές και μαγαζιά· τις τιμές και την ποιότητα τα έλεγχε ο Έπαρχος της Πόλης.' },
+  { id: 'f-column', b: 'column', ch: 7,  t: 'Στο μεγάλο φόρουμ ο Κωνσταντίνος έστησε κίονα με το άγαλμά του. Έφερε στην Πόλη και έργα τέχνης από τη Ρώμη.' },
+  { id: 'f-eirene', b: 'eirene', ch: 8,  t: 'Το 325 ο Κωνσταντίνος συγκάλεσε στη Νίκαια την Α΄ Οικουμενική Σύνοδο· λίγο πριν πεθάνει (337) βαφτίστηκε χριστιανός.' },
+  { id: 'f-sophia', b: 'sophia', ch: 7,  t: 'Ο Κωνσταντίνος έχτισε εκκλησίες: την Αγία Σοφία, την Αγία Ειρήνη και τους Αγίους Αποστόλους. Τους παλιούς ναούς όμως τους άφησε όρθιους.' },
+  { id: 'f-apost',  b: 'apostles', ch: 7, t: 'Στους Αγίους Αποστόλους θάφτηκε ο Κωνσταντίνος, το 337. Το έργο της Πόλης το ολοκλήρωσε ο γιος του Κωνστάντιος.' },
+  { id: 'f-aqua',   b: 'aqueduct', ch: 7, t: 'Για να ζήσουν οι κάτοικοι, χτίστηκαν κρήνες, λουτρά και υδραγωγεία.' },
+  { id: 'f-cist',   b: 'cisterns', ch: 7, t: 'Οι δεξαμενές της Πόλης χωρούσαν νερό για έξι ολόκληρους μήνες!' },
+  { id: 'f-palace', b: 'palace', ch: 10, t: 'Το Μέγα Παλάτι, πάνω από τον Βόσπορο, στέγαζε την οικογένεια του αυτοκράτορα, τις υπηρεσίες του κράτους, αίθουσες υποδοχής, παρεκκλήσια, φρουρά και εργαστήρια, δεμένα με στοές, αυλές και κήπους.' },
+  { id: 'f-hippo',  b: 'hippodrome', ch: 10, t: 'Ο Ιππόδρομος φτιάχτηκε με πρότυπο το Κολοσσαίο. Εκεί ο λαός επευφημούσε τον αυτοκράτορα και έλεγε τα παράπονά του. Τους αγώνες οργάνωναν οι Δήμοι: Πράσινοι, Βένετοι, Λευκοί, Ερυθροί.' },
+  { id: 'f-milan',  b: null, ch: 5,  t: 'Το 313 ο Κωνσταντίνος και ο Λικίνιος υπέγραψαν το Διάταγμα των Μεδιολάνων: ανεξιθρησκία για όλους.' },
+  { id: 'f-coin',   b: null, ch: 5,  t: 'Ο Κωνσταντίνος έκοψε ένα νέο χρυσό νόμισμα (solidus). Τα «σολδία» του παιχνιδιού το θυμίζουν!' },
+  { id: 'f-nea',    b: null, ch: 6,  t: 'Η πόλη λεγόταν επίσημα «Νέα Ρώμη», αλλά σύντομα την έλεγαν Κωνσταντινούπολη ή απλώς «η Πόλη».' },
+  { id: 'f-hills',  b: null, ch: 11, t: 'Η Κωνσταντινούπολη ήταν η «Επτάλοφη»: έβλεπε στον Βόσπορο, την Προποντίδα και τον Κεράτιο κόλπο.' },
+  { id: 'f-six',    b: null, ch: 7,  t: 'Τεχνίτες απ’ όλη την αυτοκρατορία έχτισαν την Πόλη σε έξι χρόνια: θεμελίωση Νοέμβριο του 324, εγκαίνια Μάιο του 330.' }
+];
+
+/* ---- Εισαγωγές χρονιάς (με κεφάλαιο) ---- */
+const YEAR_INTRO = [
+  { ch: 5,  t: '324: ο Κωνσταντίνος νίκησε τον Λικίνιο στην Αδριανούπολη και έγινε μονοκράτορας. Αρχίζει το έργο της Νέας Ρώμης!' },
+  { ch: 8,  t: '325: στη Νίκαια συνέρχεται η Α΄ Οικουμενική Σύνοδος. Το εργοτάξιο της Πόλης δουλεύει ακατάπαυστα.' },
+  { ch: 7,  t: '326: εργάτες και τεχνίτες από όλη την αυτοκρατορία φτάνουν στο εργοτάξιο.' },
+  { ch: 7,  t: '327: έργα τέχνης έρχονται από τη Ρώμη για να στολίσουν την Πόλη.' },
+  { ch: 7,  t: '328: η Πόλη μεγαλώνει και διψάει. Χρειάζονται κρήνες, λουτρά, υδραγωγεία και δεξαμενές.' },
+  { ch: 7,  t: '329: στην Πόλη υψώνονται εκκλησίες, δίπλα στους παλιούς ναούς.' },
+  { ch: 7,  t: '330: έξι χρόνια δουλειάς! Τον Μάιο γίνονται τα εγκαίνια της Πόλης.' }
+];
+
+/* ---- Το Συμβούλιο: [id, ch, ερώτηση, [ΣΩΣΤΗ, λάθος, λάθος], εξήγηση]  (η σωστή είναι πάντα πρώτη εδώ· παρουσιάζεται ανακατεμένη) ---- */
+const COUNCIL_RAW = [
+  /* 324 */
+  ['c-why', 6, 'Αυτοκράτορα, γιατί να χτίσουμε νέα πρωτεύουσα και να μη μείνουμε στη Ρώμη;',
+    ['Η Ρώμη είναι μακριά από τα απειλούμενα σύνορα (Δούναβης, Ανατολή) και δεμένη με την παλιά θρησκεία και τους διωγμούς', 'Επειδή στη Ρώμη δεν έμεινε ούτε ένα σπίτι', 'Επειδή η Ρώμη είχε καεί ολόκληρη'],
+    'Ο Κωνσταντίνος βρήκε τη Ρώμη πολύ μακριά από τα σύνορα του Δούναβη και της Ανατολής και δεμένη με την παλιά λατρεία και τους διωγμούς των χριστιανών.'],
+  ['c-site', 6, 'Γιατί το Βυζάντιο είναι ιδανική θέση για την πρωτεύουσα;',
+    ['Ελέγχει τον δρόμο ξηράς Ευρώπη–Ασία και τον θαλάσσιο δρόμο Εύξεινος Πόντος–Αιγαίο', 'Βρίσκεται μέσα σε μια έρημο, μακριά από όλους', 'Βρίσκεται ψηλά στις Άλπεις'],
+    'Η θέση του Βυζαντίου, στον Βόσπορο και την Προποντίδα, έλεγχε τους χερσαίους δρόμους Ευρώπης–Ασίας και τον θαλάσσιο δρόμο Εύξεινου Πόντου–Αιγαίου. Εκεί τελείωνε και η Εγνατία Οδός.'],
+  ['c-sole', 5, 'Νικήσαμε τον Λικίνιο στην Αδριανούπολη (324). Τι είμαστε τώρα;',
+    ['Μονοκράτορας: ο μόνος αυτοκράτορας', 'Ένας από τους τέσσερις τετράρχες', 'Ανθύπατος της Αχαΐας'],
+    'Το 324 ο Κωνσταντίνος νίκησε τον Λικίνιο στην Αδριανούπολη και έγινε μονοκράτορας (ο Διοκλητιανός είχε χωρίσει την εξουσία σε τετραρχία).'],
+  /* 325 */
+  ['c-temples', 7, 'Οι παλιοί ναοί των θεών: τους γκρεμίζουμε ή τους κρατάμε;',
+    ['Τους κρατάμε και χτίζουμε δίπλα εκκλησίες (ανεξιθρησκία)', 'Τους γκρεμίζουμε όλους σήμερα', 'Απαγορεύουμε σε όλους τους χριστιανούς να μπουν στην Πόλη'],
+    'Ο Κωνσταντίνος κράτησε τους ναούς των παλιών θεών και έχτισε εκκλησίες, σύμφωνα με την ανεξιθρησκία του 313. Τους ναούς τους έκλεισε αργότερα ο Θεοδόσιος.'],
+  ['c-nicaea', 8, 'Οι επίσκοποι διαφωνούν μεταξύ τους. Τι κάνει ο αυτοκράτορας το 325;',
+    ['Συγκαλεί στη Νίκαια την Α΄ Οικουμενική Σύνοδο', 'Στέλνει στρατό να τους διώξει', 'Κλείνει όλες τις εκκλησίες'],
+    'Το 325 ο Κωνσταντίνος συγκάλεσε την Α΄ Οικουμενική Σύνοδο στη Νίκαια.'],
+  ['c-milan', 5, 'Τι όριζε το Διάταγμα των Μεδιολάνων (313);',
+    ['Θρησκευτική ελευθερία (ανεξιθρησκία)', 'Ότι οι χριστιανοί πρέπει να διωχθούν', 'Ότι η πρωτεύουσα μεταφέρεται στη Νίκαια'],
+    'Με το Διάταγμα των Μεδιολάνων (313) ο Κωνσταντίνος και ο Λικίνιος παραχώρησαν θρησκευτική ελευθερία.'],
+  /* 326 */
+  ['c-workers', 7, 'Ποιοι θα χτίσουν τη Νέα Ρώμη;',
+    ['Εργάτες και τεχνίτες απ’ όλη την αυτοκρατορία', 'Μόνο οι κάτοικοι της Ρώμης', 'Κανένας· η Πόλη θα χτιστεί από μόνη της'],
+    'Εργάτες από όλη την αυτοκρατορία έχτισαν την Πόλη σε έξι χρόνια (324–330).'],
+  ['c-walls', 7, 'Τι κάνουμε με τα τείχη της Πόλης;',
+    ['Επισκευάζουμε τα παλιά, χτίζουμε νέα και ανταμείβουμε όσους τα φυλάνε', 'Γκρεμίζουμε τα παλιά για να έχουμε χώρο', 'Τα αφήνουμε χωρίς φύλακες'],
+    'Ο Κωνσταντίνος επισκεύασε την ακρόπολη και τα παλιά τείχη, έχτισε νέα και αντάμειψε όσους τα φύλαγαν.'],
+  /* 327 */
+  ['c-art', 7, 'Η Πόλη θέλει αγάλματα και έργα τέχνης. Από πού τα φέρνουμε;',
+    ['Από τη Ρώμη', 'Από την Αμερική', 'Δεν χρειάζονται αγάλματα σε μια πρωτεύουσα'],
+    'Ο Κωνσταντίνος μετέφερε έργα τέχνης από τη Ρώμη για να στολίσει τη Νέα Ρώμη. (Η Αμερική ήταν άγνωστη τότε!)'],
+  ['c-coin', 5, 'Πώς πληρώνουμε τους τεχνίτες;',
+    ['Με το νέο χρυσό νόμισμα (solidus) του Κωνσταντίνου', 'Με χαρτονομίσματα', 'Με πιστωτικές κάρτες'],
+    'Ο Κωνσταντίνος έκοψε ένα νέο χρυσό νόμισμα, το solidus, και αυτό θυμίζουν τα σολδία μας.'],
+  ['c-lang', 6, 'Ποια γλώσσα θα ακούγεται στους δρόμους της Πόλης;',
+    ['Τα ελληνικά· ακόμη και οι λατινόφωνοι έποικοι τα μαθαίνουν', 'Μόνο λατινικά· τα ελληνικά απαγορεύονται', 'Μόνο αρχαία αιγυπτιακά'],
+    'Η Ανατολή ήταν ελληνόφωνη και κυρίως χριστιανική· οι λατινόφωνοι έποικοι έμαθαν ελληνικά και ο ελληνικός πολιτισμός απλώθηκε.'],
+  /* 328 */
+  ['c-water', 7, 'Η Πόλη γεμίζει κόσμο. Πώς θα έχει νερό ακόμη και σε ξηρασία;',
+    ['Με υδραγωγεία και δεξαμενές που κρατούν νερό για έξι μήνες', 'Θα πίνουν μόνο θαλασσινό νερό', 'Θα περιμένουν να βρέξει'],
+    'Ο Κωνσταντίνος έφτιαξε κρήνες, λουτρά, υδραγωγεία και δεξαμενές που χωρούσαν νερό για έξι μήνες.'],
+  ['c-eparch', 11, 'Ποιος ελέγχει την ποιότητα και τις τιμές των τροφίμων στην αγορά;',
+    ['Ο Έπαρχος της Πόλης', 'Οι αρματηλάτες του ιπποδρόμου', 'Ο Δούναβης'],
+    'Τον εφοδιασμό, την ποιότητα και τις τιμές των αναγκαίων τις εποπτεύει ο Έπαρχος της Πόλης.'],
+  ['c-mese', 11, 'Σε ποια κεντρική λεωφόρο βρίσκεται το Φόρουμ του Κωνσταντίνου;',
+    ['Στη Μέση λεωφόρο', 'Στην Ιερά Οδό της Ρώμης', 'Μέσα στο Κολοσσαίο'],
+    'Το Φόρουμ του Κωνσταντίνου ήταν στη Μέση λεωφόρο της Κωνσταντινούπολης, της «Επτάλοφης».'],
+  /* 329 */
+  ['c-hippo', 10, 'Πώς ψυχαγωγούμε τον λαό και ακούμε τα παράπονά του;',
+    ['Με αρματοδρομίες στον Ιππόδρομο, μπροστά στον αυτοκράτορα', 'Με μονομαχίες στο Κολοσσαίο της Ρώμης', 'Κλείνοντας όλους τους δημόσιους χώρους'],
+    'Στον Ιππόδρομο γίνονταν αρματοδρομίες· ο λαός επευφημούσε τον αυτοκράτορα και έλεγε τα παράπονά του.'],
+  ['c-demes', 10, 'Οι Δήμοι οργανώνουν τους αγώνες. Ποιοι ήταν;',
+    ['Αθλητικοί σύλλογοι με χρώματα: Πράσινοι, Βένετοι (μπλε), Λευκοί, Ερυθροί', 'Οι τέσσερις τετράρχες', 'Οι Τρεις Ιεράρχες'],
+    'Οι Δήμοι ήταν αθλητικοί σύλλογοι που ονομάζονταν από τα χρώματα Πράσινοι, Βένετοι, Λευκοί, Ερυθροί· η αντιπαλότητά τους συχνά γινόταν βίαιη.'],
+  ['c-churches', 7, 'Ποιες εκκλησίες χτίζονται στην Πόλη;',
+    ['Αγία Σοφία, Αγία Ειρήνη, Άγιοι Απόστολοι', 'Παρθενώνας, Πάνθεο, Κολοσσαίο', 'Μόνο το Πάνθεο της Ρώμης'],
+    'Ο Κωνσταντίνος έχτισε τις εκκλησίες της Αγίας Σοφίας, της Αγίας Ειρήνης και των Αγίων Αποστόλων.'],
+  /* 330 */
+  ['c-date', 7, 'Πότε γίνονται τα εγκαίνια της Πόλης;',
+    ['Τον Μάιο του 330', 'Το 313', 'Το 476'],
+    'Η Πόλη θεμελιώθηκε τον Νοέμβριο του 324 και εγκαινιάστηκε τον Μάιο του 330.'],
+  ['c-name', 6, 'Πώς θα ονομάζεται η νέα πρωτεύουσα;',
+    ['Νέα Ρώμη, σύντομα Κωνσταντινούπολη ή απλώς «η Πόλη»', 'Νέα Αθήνα', 'Μεδιόλανα'],
+    'Επίσημα λεγόταν Νέα Ρώμη, σύντομα όμως Κωνσταντινούπολη ή απλώς «η Πόλη».']
+];
+/* ποια ερωτήματα ανήκουν σε ποια χρονιά (δείκτες στο COUNCIL_RAW) */
+const COUNCIL_BY_YEAR = [[0, 1, 2], [3, 4, 5], [6, 7], [8, 9, 10], [11, 12, 13], [14, 15, 16], [17, 18]];
+const ADVISORS = ['ο Έπαρχος', 'ο Αρχιτέκτονας', 'ο Γραμματέας', 'ο Σύμβουλος'];
+
+/* ---- Ερωτήσεις επανάληψης (Επιθεώρηση αυτοκράτορα + Γρήγορη Επιθεώρηση) ---- */
+const REVIEW_RAW = [
+  ['r-146', 1, 'Πότε κατέκτησαν οι Ρωμαίοι την Ελλάδα;', ['Το 146 π.Χ.', 'Το 330 μ.Χ.', 'Το 476 μ.Χ.'], 'Το 146 π.Χ. οι Ρωμαίοι κατέκτησαν την Ελλάδα και εφάρμοσαν το «διαίρει και βασίλευε».'],
+  ['r-divide', 1, 'Τι σήμαινε «διαίρει και βασίλευε» για τις πόλεις της Ελλάδας;', ['Ανταμοίβονταν όσες τάχθηκαν με τους Ρωμαίους και τιμωρούνταν όσες αντιστάθηκαν', 'Όλες οι πόλεις γίνονταν ένα κράτος', 'Όλες οι πόλεις έπαιρναν φόρους από τη Ρώμη'], 'Οι Ρωμαίοι έδωσαν αυτονομία σε πόλεις που τους ευνόησαν και τιμώρησαν όσες αντιστάθηκαν (γκρέμισαν τείχη, βαριοί φόροι, φρουρές).'],
+  ['r-alpha', 2, 'Από ποιο αλφάβητο προέρχεται το λατινικό;', ['Από το ελληνικό', 'Από το αιγυπτιακό', 'Από το κινεζικό'], 'Το λατινικό αλφάβητο προέρχεται από το ελληνικό. Οι Έλληνες «κατέκτησαν» τους Ρωμαίους με τον πολιτισμό τους.'],
+  ['r-egn', 3, 'Η Εγνατία Οδός ένωνε το Δυρράχιο με τη Θεσσαλονίκη και…', ['το Βυζάντιο', 'τη Μασσαλία', 'την Καρχηδόνα'], 'Η Εγνατία Οδός έφτανε από το Δυρράχιο και τη Θεσσαλονίκη μέχρι το Βυζάντιο.'],
+  ['r-pax', 3, 'Πόσα χρόνια διήρκεσε περίπου η ρωμαϊκή ειρήνη (pax romana);', ['Περίπου 200 χρόνια', 'Περίπου 2 χρόνια', 'Περίπου 2.000 χρόνια'], 'Η ρωμαϊκή ειρήνη κράτησε περίπου 200 χρόνια, με ευημερία στη γεωργία, το εμπόριο και τη ναυτιλία.'],
+  ['r-mare', 3, 'Τι ήταν το «mare nostrum» («η θάλασσά μας») για τους Ρωμαίους;', ['Η Μεσόγειος', 'Ο Ατλαντικός', 'Η Βαλτική'], 'Οι Ρωμαίοι κατέκτησαν όλη τη Μεσόγειο και την έλεγαν «mare nostrum».'],
+  ['r-bread', 4, 'Τι σημαίνει «άρτος και θεάματα»;', ['Οι αυτοκράτορες ευχαριστούσαν τον λαό με τροφή και θεάματα, όπως οι μονομαχίες', 'Ότι οι Ρωμαίοι έτρωγαν μόνο ψωμί', 'Ότι τα θέατρα ήταν δωρεάν για τους σκλάβους'], 'Για να έχουν ήσυχους τους πολίτες, οι αυτοκράτορες πρόσφεραν ψωμί και θεάματα (μονομαχίες, θηριομαχίες) στο Κολοσσαίο.'],
+  ['r-tetr', 5, 'Τι ήταν η τετραρχία του Διοκλητιανού;', ['Η αυτοκρατορία χωρίστηκε σε τέσσερις περιοχές', 'Τέσσερις γιορτές τον χρόνο', 'Ένας στρατός τεσσάρων λεγεώνων'], 'Ο Διοκλητιανός μοίρασε την εξουσία σε τέσσερις περιοχές. Όταν παραιτήθηκε, οι συνάρχοντες πολέμησαν μεταξύ τους.'],
+  ['r-crisis', 5, 'Ποιοι επιτίθονταν στα σύνορα στην κρίση του 3ου αιώνα;', ['Γότθοι και Πέρσες', 'Βίκινγκς και Μογγόλοι', 'Αζτέκοι και Ίνκας'], 'Τον 3ο αιώνα Γότθοι και Πέρσες λεηλατούσαν τα σύνορα, ο στρατός έκανε και έριχνε αυτοκράτορες και οι διωγμοί χώριζαν τον κόσμο.'],
+  ['r-lic', 5, 'Ποιον νίκησε ο Κωνσταντίνος στην Αδριανούπολη το 324;', ['Τον Λικίνιο', 'Τον Θεοδόσιο', 'Τον Ιουλιανό'], 'Το 324 νίκησε τον Λικίνιο και έμεινε μονοκράτορας.'],
+  ['r-byzas', 6, 'Ποιος ίδρυσε το Βυζάντιο, παλιά αποικία των Μεγαρέων;', ['Ο Βύζας', 'Ο Αλέξανδρος', 'Ο Διοκλητιανός'], 'Το Βυζάντιο ήταν αρχαία μεγαρική αποικία, που ίδρυσε ο Βύζας, πάνω στην Προποντίδα.'],
+  ['r-helena', 6, 'Ποια ήταν η μητέρα του Κωνσταντίνου;', ['Η Ελένη, ελληνίδα και χριστιανή', 'Η Ευδοκία', 'Η Αθηνά'], 'Η μητέρα του Κωνσταντίνου, η Ελένη, ήταν ελληνίδα και χριστιανή.'],
+  ['r-sea', 6, 'Ποιους θαλάσσιους χώρους ένωνε η θέση της Πόλης;', ['Τον Εύξεινο Πόντο και το Αιγαίο', 'Την Αδριατική και τη Βαλτική', 'Την Ερυθρά και τη Μεσόγειο'], 'Η Πόλη ήλεγχε τον θαλάσσιο δρόμο Εύξεινος Πόντος–Αιγαίο (μέσω Βοσπόρου, Προποντίδας).'],
+  ['r-bury', 7, 'Πού θάφτηκε ο Κωνσταντίνος το 337;', ['Στους Αγίους Αποστόλους', 'Στο Κολοσσαίο', 'Στον Παρθενώνα'], 'Ο Κωνσταντίνος θάφτηκε στην εκκλησία των Αγίων Αποστόλων.'],
+  ['r-cist', 7, 'Για πόσο χρόνο έφταναν τα νερά των δεξαμενών της Πόλης;', ['Για έξι μήνες', 'Για έξι ώρες', 'Για έξι χρόνια'], 'Οι δεξαμενές χωρούσαν νερό για έξι μήνες.'],
+  ['r-six', 7, 'Σε πόσα χρόνια χτίστηκε η Πόλη (324–330);', ['Σε έξι χρόνια', 'Σε έναν μήνα', 'Σε εξήντα χρόνια'], 'Η Κωνσταντινούπολη χτίστηκε σε έξι χρόνια: θεμελίωση Νοέμβριο 324, εγκαίνια Μάιο 330.'],
+  ['r-nic', 8, 'Πού συνήλθε η Α΄ Οικουμενική Σύνοδος (325);', ['Στη Νίκαια', 'Στη Ρώμη', 'Στην Αθήνα'], 'Η Α΄ Οικουμενική Σύνοδος έγινε στη Νίκαια το 325.'],
+  ['r-julian', 8, 'Τι προσπάθησε να κάνει ο Ιουλιανός (361–363), ο «Παραβάτης»;', ['Να επαναφέρει την παλιά θρησκεία και να περιορίσει τον χριστιανισμό', 'Να μεταφέρει την πρωτεύουσα στη Ρώμη', 'Να ιδρύσει το Πανδιδακτήριο'], 'Ο Ιουλιανός, μορφωμένος στην Αθήνα, προσπάθησε να επαναφέρει την παλιά θρησκεία, απέτυχε και σκοτώθηκε πολεμώντας τους Πέρσες.'],
+  ['r-olymp', 8, 'Ποιος αυτοκράτορας έκανε τον χριστιανισμό επίσημη θρησκεία και κατάργησε τους Ολυμπιακούς Αγώνες (392);', ['Ο Θεοδόσιος Α΄', 'Ο Διοκλητιανός', 'Ο Αδριανός'], 'Ο Θεοδόσιος Α΄ έκανε τον χριστιανισμό επίσημη θρησκεία και κατάργησε τους Ολυμπιακούς Αγώνες το 392.'],
+  ['r-hier', 8, 'Ποιος ανήκει στους Τρεις Ιεράρχες;', ['Ιωάννης ο Χρυσόστομος', 'Ιουλιανός', 'Αττίλας'], 'Τρεις Ιεράρχες: Βασίλειος ο Μέγας, Γρηγόριος ο Θεολόγος και Ιωάννης ο Χρυσόστομος.'],
+  ['r-395', 9, 'Ποιοι κυβέρνησαν Ανατολή και Δύση μετά τη διαίρεση του 395;', ['Ο Αρκάδιος (Ανατολή) και ο Ονώριος (Δύση)', 'Ο Λικίνιος και ο Μαξέντιος', 'Ο Ιουλιανός και ο Αττίλας'], 'Το 395 ο Θεοδόσιος μοίρασε την αυτοκρατορία στους γιους του, Αρκάδιο (Ανατολή) και Ονώριο (Δύση).'],
+  ['r-476', 9, 'Τι συνέβη το 476;', ['Διαλύθηκε η Δυτική Ρωμαϊκή Αυτοκρατορία', 'Εγκαινιάστηκε η Κωνσταντινούπολη', 'Υπογράφηκε το Διάταγμα των Μεδιολάνων'], 'Το 476 διαλύθηκε η Δυτική Ρωμαϊκή Αυτοκρατορία.'],
+  ['r-unite', 9, 'Τι ένωνε τους λαούς της Ανατολικής αυτοκρατορίας;', ['Το ρωμαϊκό δίκαιο, ο χριστιανισμός και η ελληνική γλώσσα', 'Μόνο ο στρατός', 'Μόνο το εμπόριο με την Κίνα'], 'Τους λαούς της Ανατολής ένωναν το ρωμαϊκό δίκαιο, ο χριστιανισμός και η ελληνική γλώσσα.'],
+  ['r-alaric', 9, 'Ποιος λεηλάτησε τη Ρώμη το 410;', ['Ο Αλάριχος με τους Γότθους', 'Ο Αττίλας με τους Ούννους', 'Ο Γέλιμερ με τους Βανδάλους'], 'Το 410 οι Γότθοι του Αλάριχου λεηλάτησαν τη Ρώμη.'],
+  ['r-pand', 9, 'Ποιοι ίδρυσαν το Πανδιδακτήριο (πανεπιστήμιο της Κωνσταντινούπολης);', ['Ο Θεοδόσιος Β΄ και η Ευδοκία', 'Ο Βύζας και η Ελένη', 'Ο Αρκάδιος και ο Ονώριος'], 'Το Πανδιδακτήριο το ίδρυσαν ο Θεοδόσιος Β΄ και η Ευδοκία.'],
+  ['r-hip', 10, 'Ποιο μνημείο ήταν το πρότυπο του Ιπποδρόμου;', ['Το Κολοσσαίο', 'Το Πάνθεο', 'Ο Παρθενώνας'], 'Ο Ιππόδρομος χτίστηκε με πρότυπο το Κολοσσαίο και φιλοξενούσε αρματοδρομίες.'],
+  ['r-deme', 10, 'Ποιο ήταν χρώμα των Δήμων του Ιπποδρόμου;', ['Πράσινο', 'Μωβ', 'Μαύρο'], 'Οι Δήμοι: Πράσινοι, Βένετοι (μπλε), Λευκοί, Ερυθροί.'],
+  ['r-seven', 11, 'Πώς λεγόταν η Κωνσταντινούπολη, με τους επτά λόφους της;', ['Επτάλοφη', 'Εξάλοφη', 'Εκατόλοφη'], 'Η Κωνσταντινούπολη ήταν η «Επτάλοφη».'],
+  ['r-school', 12, 'Σε τι ηλικία ξεκινούσαν το σχολείο τα παιδιά στο Βυζάντιο;', ['Στα 6–8 τους χρόνια', 'Στα 18 τους', 'Στον πρώτο μήνα ζωής'], 'Η εκπαίδευση δεν ήταν υποχρεωτική· τα παιδιά ξεκινούσαν στα 6–8 τους χρόνια.'],
+  ['r-wax', 12, 'Πάνω σε τι έγραφαν οι μαθητές στο Βυζάντιο στην αρχή;', ['Σε κέρινες ή πέτρινες πινακίδες', 'Σε οθόνες υπολογιστή', 'Σε τετράδια με σπιράλ'], 'Οι μαθητές έγραφαν σε πινακίδες από κερί ή πέτρα, αργότερα σε πάπυρο, περγαμηνή και (από τον 10ο αιώνα) χαρτί.']
+];
+
+function mkItem(a, kind) { return { id: a[0], ch: a[1], q: a[2], opts: a[3], a: 0, ex: a[4], kind }; }
+const COUNCIL = COUNCIL_RAW.map(a => mkItem(a, 'council'));
+const REVIEW = REVIEW_RAW.map(a => mkItem(a, 'review'));
+const ITEMS = {}; COUNCIL.concat(REVIEW).forEach(i => ITEMS[i.id] = i);
+const TOLERANT_ITEM = 'c-temples';
+
+/* ---- ντετερμινιστικός τυχαίος & ανακάτεμα ---- */
+function rnd(s) {            // mulberry32, η κατάσταση ζει στο s.rs (αποθηκεύεται)
+  s.rs = (s.rs + 0x6D2B79F5) | 0;
+  let t = s.rs; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function hashStr(str) { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h | 0; }
+/* μετάθεση [0,1,2]: η θέση k της οθόνης δείχνει την επιλογή perm[k]· σωστή είναι η επιλογή 0 */
+function orderFor(id, seed, n) {
+  n = n || 3; const o = { rs: hashStr(id) ^ (seed | 0) }; const a = []; for (let i = 0; i < n; i++) a.push(i);
+  for (let i = n - 1; i > 0; i--) { const j = Math.floor(rnd(o) * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+/* ---- Κάρτες Απρόοπτου ---- */
+function pay(s, n) { const p = Math.min(n, s.soldia); s.soldia -= p; return p; }
+function has(s, id) { return s.built.includes(id); }
+const CHURCHES = ['eirene', 'sophia', 'apostles'];
+const EVENTS = [
+  { id: 'fire', icon: '🔥', title: 'Φωτιά στην αγορά!', min: 0, type: 'task', ch: 11,
+    text: 'Φλόγες στις στοές της αγοράς! Σβήσε τις φωτιές σε 10″, αλλιώς κινδυνεύει το Φόρουμ.',
+    resolve(s, r) {
+      if (r.pass) { s.soldia += 10; return { tone: 'good', d: 10, msg: 'Έσβησες τις φωτιές! Οι έμποροι σου δίνουν 10 σολδία.' }; }
+      if (has(s, 'forum')) { s.built = s.built.filter(x => x !== 'forum'); s.lost.push('forum'); return { tone: 'bad', d: 0, lostB: 'forum', msg: 'Το Φόρουμ καταστράφηκε! Ξαναχτίζεται με μισό κόστος.' }; }
+      const p = pay(s, 15); return { tone: 'bad', d: -p, msg: 'Κάηκαν τα εργαστήρια. Πληρώνεις ' + p + ' σολδία για επισκευές.' };
+    } },
+  { id: 'goths', icon: '⚔️', title: 'Οι Γότθοι στον Δούναβη!', min: 0, type: 'auto', ch: 5,
+    text: 'Γότθοι πλησιάζουν από τα σύνορα του Δούναβη. Έχει η Πόλη τείχη;',
+    resolve(s) {
+      if (has(s, 'walls')) { s.soldia += 25; return { tone: 'good', d: 25, msg: 'Τα τείχη κράτησαν! Ο αυτοκράτορας σε επιβραβεύει με 25 σολδία.' }; }
+      const p = pay(s, 30); s.mess = Math.min(3, s.mess + 1); return { tone: 'bad', d: -p, msg: 'Χωρίς τείχη, πληρώνεις ' + p + ' σολδία για να φύγουν οι Γότθοι.' };
+    } },
+  { id: 'persians', icon: '🏹', title: 'Οι Πέρσες στα ανατολικά!', min: 1, type: 'auto', ch: 5,
+    text: 'Πέρσες κάνουν επιδρομές στα ανατολικά σύνορα, όπως τον 3ο αιώνα. Είναι έτοιμη η Πόλη;',
+    resolve(s) {
+      if (has(s, 'walls')) { s.soldia += 15; return { tone: 'good', d: 15, msg: 'Τα τείχη τους απέτρεψαν. +15 σολδία.' }; }
+      const p = pay(s, 20); return { tone: 'bad', d: -p, msg: 'Πληρώνεις ' + p + ' σολδία για να υπερασπιστείς την Πόλη.' };
+    } },
+  { id: 'drought', icon: '🏜️', title: 'Ξηρασία!', min: 2, type: 'auto', ch: 7,
+    text: 'Δεν έβρεξε μήνες! Έχει η Πόλη νερό;',
+    resolve(s) {
+      if (has(s, 'cisterns')) { s.soldia += 10; return { tone: 'good', d: 10, msg: 'Οι δεξαμενές έσωσαν την Πόλη: νερό για έξι μήνες! +10 σολδία.' }; }
+      if (has(s, 'aqueduct')) { const p = pay(s, 10); return { tone: 'meh', d: -p, msg: 'Το υδραγωγείο βοήθησε, αλλά χρειάζονται δεξαμενές. Πληρώνεις ' + p + '.' }; }
+      const p = pay(s, 25); s.mess = Math.min(3, s.mess + 1); return { tone: 'bad', d: -p, msg: 'Χωρίς υδραγωγείο και δεξαμενές, φέρνεις νερό με καράβια: ' + p + ' σολδία.' };
+    } },
+  { id: 'emperor', icon: '👑', title: 'Έφτασε ο αυτοκράτορας!', min: 0, type: 'quiz', ch: 0,
+    text: 'Ο αυτοκράτορας επιθεωρεί το έργο! Απάντησε σε 3 ερωτήσεις για να κερδίσεις μετάλλιο.',
+    resolve(s, r) {
+      const n = r.n | 0;
+      if (n >= 2) { s.medals++; s.soldia += 25; return { tone: 'good', d: 25, medal: true, msg: 'Μετάλλιο επιθεώρησης (' + n + '/3)! +25 σολδία.' }; }
+      if (n === 1) { s.soldia += 10; return { tone: 'meh', d: 10, msg: '1/3. Ο αυτοκράτορας χαμογελά και σου δίνει 10 σολδία.' }; }
+      return { tone: 'meh', d: 0, msg: '0/3. Την επόμενη φορά! Διάβασε τις εξηγήσεις.' };
+    } },
+  { id: 'quake', icon: '🌋', title: 'Σεισμός!', min: 0, type: 'auto', ch: 0,
+    text: 'Η γη τρέμει! (Απρόοπτο του παιχνιδιού.) Λίγες ζημιές στο εργοτάξιο.',
+    resolve(s) { const p = pay(s, 15); return { tone: 'bad', d: -p, msg: 'Επισκευές: -' + p + ' σολδία. Δεν έπεσε κανένα κτίριο.' }; } },
+  { id: 'gift', icon: '🏺', title: 'Δώρο από τη Ρώμη: αγάλματα!', min: 0, type: 'auto', ch: 7,
+    text: 'Φτάνουν καράβια από τη Ρώμη με αγάλματα και έργα τέχνης!',
+    resolve(s) {
+      s.statues = true;
+      const d = has(s, 'forum') ? 40 : 25; s.soldia += d;
+      return { tone: 'good', d, msg: has(s, 'forum') ? 'Τα αγάλματα στολίζουν το Φόρουμ! +40 σολδία.' : 'Τα αγάλματα περιμένουν να στηθούν. +25 σολδία.' };
+    } },
+  { id: 'market', icon: '🛒', title: 'Μέρα αγοράς!', min: 0, type: 'auto', ch: 11,
+    text: 'Έμποροι γεμίζουν την Πόλη. Έχει η Πόλη αγορά;',
+    resolve(s) { const d = has(s, 'forum') ? 30 : 10; s.soldia += d; return { tone: has(s, 'forum') ? 'good' : 'meh', d, msg: has(s, 'forum') ? 'Το Φόρουμ γέμισε πελάτες! +30 σολδία.' : 'Χωρίς Φόρουμ, οι έμποροι πουλούν στον δρόμο. +10 σολδία.' }; } },
+  { id: 'blacksea', icon: '⛵', title: 'Καράβια από τον Εύξεινο Πόντο', min: 0, type: 'auto', ch: 6,
+    text: 'Πλοία από τον Εύξεινο Πόντο περνούν από τον Βόσπορο και δένουν στην Πόλη.',
+    resolve(s) { s.soldia += 25; return { tone: 'good', d: 25, msg: 'Η θέση της Πόλης στον θαλάσσιο δρόμο Εύξεινος Πόντος–Αιγαίο φέρνει εμπόριο. +25 σολδία.' }; } },
+  { id: 'helena', icon: '👵', title: 'Η Ελένη επισκέπτεται την Πόλη', min: 0, type: 'auto', ch: 6,
+    text: 'Η Ελένη, η μητέρα του Κωνσταντίνου, ελληνίδα και χριστιανή, ήρθε να δει το έργο.',
+    resolve(s) {
+      const ch = CHURCHES.some(c => has(s, c));
+      const d = ch ? 25 : 5; s.soldia += d;
+      return { tone: ch ? 'good' : 'meh', d, msg: ch ? 'Βλέπει την εκκλησία και δωρίζει 25 σολδία!' : 'Δεν υπάρχει ακόμη εκκλησία να επισκεφτεί. Αφήνει 5 σολδία.' };
+    } },
+  { id: 'egnatia', icon: '🐪', title: 'Καραβάνι από την Εγνατία', min: 0, type: 'auto', ch: 6,
+    text: 'Έμποροι έφτασαν από την Εγνατία Οδό, που τελειώνει στην Πόλη.',
+    resolve(s) { const d = has(s, 'forum') ? 30 : 20; s.soldia += d; return { tone: 'good', d, msg: 'Φέρνουν εμπορεύματα. +' + d + ' σολδία.' }; } },
+  { id: 'pagans', icon: '🏺', title: 'Οι ιερείς των παλιών ναών', min: 0, type: 'auto', ch: 7,
+    text: 'Ιερείς των παλιών ναών ανησυχούν: τι θα γίνουν οι ναοί τους;',
+    resolve(s) {
+      if (s.flags.tolerant) { s.soldia += 20; return { tone: 'good', d: 20, msg: 'Τους κράτησες όρθιους (ανεξιθρησκία)! Ευγνώμονες, δίνουν 20 σολδία.' }; }
+      const p = pay(s, 10); s.mess = Math.min(3, s.mess + 1); return { tone: 'bad', d: -p, msg: 'Οι ιερείς διαμαρτύρονται και η δουλειά καθυστερεί. -' + p + ' σολδία.' };
+    } },
+  { id: 'race', icon: '🏇', title: 'Αγώνες αρμάτων!', min: 4, type: 'auto', ch: 10,
+    text: 'Οι Δήμοι (Πράσινοι, Βένετοι…) ζητούν αρματοδρομίες.',
+    resolve(s) {
+      if (has(s, 'hippodrome')) { s.soldia += 30; return { tone: 'good', d: 30, msg: 'Ο Ιππόδρομος γέμισε κόσμο! +30 σολδία από τα εισιτήρια.' }; }
+      const p = pay(s, 10); return { tone: 'bad', d: -p, msg: 'Χωρίς Ιππόδρομο, οι Δήμοι τσακώθηκαν στους δρόμους. -' + p + ' σολδία.' };
+    } },
+  { id: 'eparch', icon: '⚖️', title: 'Ελέγχει ο Έπαρχος', min: 0, type: 'auto', ch: 11,
+    text: 'Ο Έπαρχος της Πόλης ελέγχει τις τιμές και την ποιότητα στην αγορά.',
+    resolve(s) { const d = has(s, 'forum') ? 15 : 0; s.soldia += d; return { tone: d ? 'good' : 'meh', d, msg: d ? 'Η αγορά είναι τακτοποιημένη. +15 σολδία από τα τέλη.' : 'Δεν υπάρχει ακόμη αγορά να ελεγχθεί.' }; } }
+];
+const EV = {}; EVENTS.forEach(e => EV[e.id] = e);
+
+/* ---- Σκηνές «Τι δεν ταιριάζει;» ---- */
+const SLOTS = [[52, 112], [132, 102], [214, 116], [296, 104], [80, 168], [180, 162], [280, 166]];
+function scene(id, title, list, why) {
+  return { id, title, why, props: list.map((p, i) => ({ e: p[0], x: SLOTS[i][0], y: SLOTS[i][1], ana: !!p[1] })) };
+}
+const SCENES = [
+  scene('s-bike', 'Ψώνια στην αγορά', [['🏺'], ['🍇'], ['🐟'], ['🧺'], ['🍞'], ['🚲', 1], ['🐈']], 'Το ποδήλατο θα εφευρεθεί πάνω από 1.500 χρόνια αργότερα!'),
+  scene('s-watch', 'Ο έμπορος', [['🐪'], ['📜'], ['🪙'], ['⚖️'], ['🏛️'], ['⌚', 1], ['🏺']], 'Ρολόι χειρός δεν υπήρχε το 330 μ.Χ.!'),
+  scene('s-pizza', 'Το λιμάνι', [['⛵'], ['🐟'], ['🏺'], ['⚓'], ['🐈'], ['🛵🍕', 1], ['🌊']], 'Ντελίβερι πίτσας με σκούτερ; Πολύ αργότερα!'),
+  scene('s-camera', 'Το εργοτάξιο', [['🧱'], ['🪨'], ['🪓'], ['🔨'], ['🐂'], ['📷', 1], ['🐈']], 'Φωτογραφική μηχανή δεν υπήρχε στην εποχή του Κωνσταντίνου.'),
+  scene('s-tomato', 'Στον κήπο', [['🌿'], ['🫒'], ['🍇'], ['🐑'], ['🦆'], ['🍅', 1], ['🐈']], 'Οι ντομάτες ήρθαν από την Αμερική, που οι Ευρωπαίοι δεν γνώριζαν ακόμη.'),
+  scene('s-phone', 'Μπροστά στο Φόρουμ', [['🏛️'], ['🏺'], ['🧓'], ['🧒'], ['📱', 1], ['🏺'], ['🐈']], 'Κινητό τηλέφωνο; Ούτε ηλεκτρικό ρεύμα δεν υπήρχε τότε!'),
+  scene('s-light', 'Στον δρόμο', [['🐎'], ['🪔'], ['🏺'], ['🚦', 1], ['🐕'], ['🧺'], ['🐈']], 'Φανάρια κυκλοφορίας δεν υπήρχαν· ούτε αυτοκίνητα!'),
+  scene('s-plane', 'Ο ουρανός της Πόλης', [['🕊️'], ['☁️'], ['🦅'], ['🌙'], ['✈️', 1], ['🏛️'], ['🐈']], 'Αεροπλάνα δεν υπήρχαν· ο ουρανός ήταν των πουλιών.')
+];
+
+/* ---- Κατάσταση & μηχανή καταστάσεων ---- */
+function newGame(seed) {
+  seed = (seed == null ? Math.floor(Math.random() * 2147483647) : seed) | 0;
+  return { v: STATE_VERSION, seed, rs: seed ^ 0x5bd1e995, yi: 0, phase: 'council', ci: 0, cOk: 0, soldia: START_SOLDIA, medals: 0,
+    built: [], unlocked: [], lost: [], placed: 0, mess: 0, statues: false, flags: { tolerant: false },
+    seen: [], ev: null, evq: null, evOut: null, scenesSeen: [], scene: null, anach: 0, final: null };
+}
+function councilItems(s) { return COUNCIL_BY_YEAR[s.yi].map(i => COUNCIL[i]); }
+function currentCouncil(s) { return s.phase === 'council' ? councilItems(s)[s.ci] : null; }
+function buildCost(s, id) { return s.lost.includes(id) ? Math.ceil(B[id].cost / 2) : B[id].cost; }
+function missingPrereqs(s, id) { return B[id].after.filter(a => !s.unlocked.includes(a)); }
+
+function answerCouncil(s, k) {
+  const it = currentCouncil(s); if (!it) return null;
+  const perm = orderFor(it.id, s.seed); const chosen = perm[k];
+  const ok = chosen === 0; const gain = ok ? GAIN_BEST : GAIN_WRONG;
+  s.soldia += gain;
+  if (ok) { s.cOk++; if (it.id === TOLERANT_ITEM) s.flags.tolerant = true; } else s.mess = Math.min(3, s.mess + 1);
+  s.ci++; if (s.ci >= councilItems(s).length) s.phase = 'build';
+  return { ok, gain, ex: it.ex, ch: it.ch, best: perm.indexOf(0), chosen: k };
+}
+function canPlace(s, id) {
+  if (s.phase !== 'build') return 'phase';
+  if (s.built.includes(id)) return 'built';
+  if (missingPrereqs(s, id).length) return 'locked';
+  if (s.placed >= MAX_BUILDS_PER_YEAR) return 'crew';
+  if (s.soldia < buildCost(s, id)) return 'poor';
+  return 'ok';
+}
+function placeBuilding(s, id) {
+  const why = canPlace(s, id); if (why !== 'ok') return { ok: false, why };
+  s.soldia -= buildCost(s, id); s.built.push(id); if (!s.unlocked.includes(id)) s.unlocked.push(id);
+  s.lost = s.lost.filter(x => x !== id); s.placed++; s.mess = Math.max(0, s.mess - 1);
+  return { ok: true, fact: FACTS.find(f => f.b === id) };
+}
+function randomFact(s) { return FACTS.filter(f => !f.b)[Math.floor(rnd(s) * FACTS.filter(f => !f.b).length)]; }
+function endBuild(s) {
+  if (s.phase !== 'build') return false;
+  if (s.yi >= YEARS.length - 1) return finish(s);
+  drawEvent(s); return true;
+}
+function drawEvent(s) {
+  let pool = EVENTS.filter(e => e.min <= s.yi && !s.seen.includes(e.id));
+  if (!pool.length) { s.seen = []; pool = EVENTS.filter(e => e.min <= s.yi); }
+  const e = pool[Math.floor(rnd(s) * pool.length)];
+  s.ev = e.id; s.seen.push(e.id); s.evOut = null; s.phase = 'event';
+  if (e.type === 'quiz') {
+    const ids = REVIEW.map(r => r.id); s.evq = [];
+    while (s.evq.length < 3) { const id = ids[Math.floor(rnd(s) * ids.length)]; if (!s.evq.includes(id)) s.evq.push(id); }
+  } else s.evq = null;
+}
+function resolveEvent(s, res) {
+  if (s.phase !== 'event' || !s.ev) return null;
+  if (s.evOut) return s.evOut;
+  const out = EV[s.ev].resolve(s, res || {});
+  if (s.soldia < 0) s.soldia = 0;
+  s.evOut = out; return out;
+}
+function afterEvent(s) {
+  if (s.phase !== 'event') return;
+  s.ev = null; s.evq = null; s.evOut = null;
+  if (SCENE_AFTER.includes(s.yi)) {
+    const free = SCENES.map((x, i) => i).filter(i => !s.scenesSeen.includes(i));
+    if (free.length) { s.scene = free[Math.floor(rnd(s) * free.length)]; s.scenesSeen.push(s.scene); s.phase = 'anach'; return; }
+  }
+  nextYear(s);
+}
+function resolveScene(s, found) {
+  if (s.phase !== 'anach') return 0;
+  let g = 0; if (found) { g = ANACH_BONUS; s.soldia += g; s.anach++; }
+  s.scene = null; nextYear(s); return g;
+}
+function nextYear(s) {
+  s.yi++; s.soldia += BASE_INCOME; s.placed = 0; s.ci = 0; s.phase = 'council'; s.ev = null; s.evq = null; s.evOut = null; s.scene = null;
+}
+function computeScore(s) { return s.soldia + s.medals * MEDAL_VALUE + s.built.length * 20 + s.anach * 15 + (s.built.length === BUILDINGS.length ? 50 : 0); }
+function computeStars(s) { return s.built.length >= 9 && s.cOk >= 16 ? 3 : s.built.length >= 6 ? 2 : 1; }
+function finish(s) { s.phase = 'done'; s.final = { score: computeScore(s), stars: computeStars(s) }; return true; }
+
+/* ---- Αποθήκευση / συνέχεια ---- */
+function saveState(s) { return JSON.stringify(s); }
+function loadState(str) {
+  try {
+    const s = JSON.parse(str); if (!s || s.v !== STATE_VERSION) return null;
+    if (!['council', 'build', 'event', 'anach', 'done'].includes(s.phase)) return null;
+    if (!(s.yi >= 0 && s.yi < YEARS.length) || !Array.isArray(s.built) || !(s.soldia >= 0)) return null;
+    return s;
+  } catch (e) { return null; }
+}
+
+/* ---- Γρήγορη Επιθεώρηση (90″) ---- */
+const SPRINT_SECONDS = 90;
+function newSprint(seed) { return { rs: (seed == null ? Math.floor(Math.random() * 2147483647) : seed) | 0, seed: (seed | 0), score: 0, wrong: 0, used: [], n: 0 }; }
+function sprintQuestion(sp) {
+  const all = COUNCIL.concat(REVIEW);
+  let pool = all.filter(i => !sp.used.includes(i.id)); if (!pool.length) { sp.used = []; pool = all; }
+  const it = pool[Math.floor(rnd(sp) * pool.length)]; sp.used.push(it.id); sp.n++;
+  const perm = orderFor(it.id, sp.rs ^ sp.n);
+  return { item: it, perm, best: perm.indexOf(0) };
+}
+
+/* ---- Επιθεώρηση: σειρά επιλογών ---- */
+function quizOrder(s, id, k) { return orderFor(id, s.seed + k * 7919); }
+
+if (typeof module !== 'undefined') module.exports = {
+  YEARS, BUILDINGS, B, FACTS, YEAR_INTRO, COUNCIL, COUNCIL_BY_YEAR, REVIEW, ITEMS, EVENTS, EV, SCENES, SCENE_AFTER, SLOTS,
+  BASE_INCOME, START_SOLDIA, GAIN_BEST, GAIN_WRONG, MAX_BUILDS_PER_YEAR, SPRINT_SECONDS, CHURCHES, ADVISORS,
+  rnd, orderFor, newGame, councilItems, currentCouncil, buildCost, missingPrereqs, answerCouncil, canPlace, placeBuilding,
+  endBuild, drawEvent, resolveEvent, afterEvent, resolveScene, nextYear, computeScore, computeStars, finish,
+  saveState, loadState, newSprint, sprintQuestion, quizOrder, randomFact
+};
+</script>
+<script>
+(function(){
+'use strict';
+const $ = id => document.getElementById(id);
+
+/* ---- αποθήκευση ---- */
+const LS = {
+  get(k, d){ try { const v = localStorage.getItem('poli.' + k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem('poli.' + k, JSON.stringify(v)); } catch(e){} },
+  del(k){ try { localStorage.removeItem('poli.' + k); } catch(e){} }
+};
+let soundOn = LS.get('sound', true);
+
+/* ---- ήχος ---- */
+let ac = null;
+function beep(f, d, type, g, when){
+  if (!soundOn) return; type = type || 'sine'; g = g || .1; when = when || 0;
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume();
+    const o = ac.createOscillator(), gn = ac.createGain(); o.type = type; o.frequency.value = f;
+    gn.gain.setValueAtTime(.0001, ac.currentTime + when); gn.gain.exponentialRampToValueAtTime(g, ac.currentTime + when + .01);
+    gn.gain.exponentialRampToValueAtTime(.0001, ac.currentTime + when + d);
+    o.connect(gn).connect(ac.destination); o.start(ac.currentTime + when); o.stop(ac.currentTime + when + d + .05);
+  } catch(e){}
+}
+const sfx = {
+  tap(){ beep(620, .06, 'triangle', .05); },
+  ok(){ beep(660, .1, 'triangle'); beep(990, .14, 'triangle', .1, .09); },
+  bad(){ beep(190, .22, 'sawtooth', .06); },
+  build(){ beep(180, .08, 'square', .06); beep(240, .08, 'square', .06, .1); beep(520, .18, 'triangle', .1, .22); },
+  card(){ beep(440, .1, 'triangle', .08); beep(660, .1, 'triangle', .08, .08); },
+  win(){ [523, 659, 784, 1047, 1319].forEach((f, i) => beep(f, .2, 'triangle', .12, i * .12)); },
+  tick(){ beep(880, .04, 'square', .03); }
+};
+function setSnd(){ $('bSnd').textContent = soundOn ? '🔊' : '🔇'; $('bSound').textContent = soundOn ? '🔊 Ήχος: ανοιχτός' : '🔇 Ήχος: κλειστός'; }
+function toggleSnd(){ soundOn = !soundOn; LS.set('sound', soundOn); setSnd(); if (soundOn) sfx.tap(); }
+
+/* ---- μικρά βοηθητικά ---- */
+let toastT = 0;
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2200); }
+const wait = ms => new Promise(r => setTimeout(r, ms));
+function show(id){ document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id)); }
+function catUse(w, h, cls){ return '<svg class="catwrap ' + (cls || '') + '" viewBox="0 0 60 48" width="' + w + '" height="' + h + '"><use href="#cat"/></svg>'; }
+const chTag = ch => ch ? '<span class="tag ch">κεφ. ' + ch + '</span>' : '';
+const starStr = n => '★'.repeat(n) + '<span class="off">' + '★'.repeat(3 - n) + '</span>';
+
+/* ---- χρονόμετρο (με παύση) ---- */
+const T = { id: 0, left: 0, last: 0, paused: false, tick: null, end: null, total: 0 };
+function tStop(){ clearInterval(T.id); T.id = 0; T.paused = false; }
+function tStart(ms, tick, end){
+  tStop(); T.left = ms; T.total = ms; T.tick = tick; T.end = end; T.last = performance.now();
+  T.id = setInterval(() => {
+    if (T.paused) return; const n = performance.now(); T.left -= n - T.last; T.last = n;
+    if (T.left <= 0){ const e = T.end; tStop(); if (e) e(); } else if (T.tick) T.tick(T.left);
+  }, 100);
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden){ saveGame(); if (T.id){ T.paused = true; $('pause').hidden = false; } }
+  else if (T.id && T.paused){ /* περιμένει πάτημα «Συνέχεια» */ }
+});
+$('bResumeT').addEventListener('click', () => { T.last = performance.now(); T.paused = false; $('pause').hidden = true; });
+window.addEventListener('pagehide', saveGame);
+
+/* ---- πανοραμα ---- */
+function citySVG(p){
+  const i = id => ' id="' + p + id + '"';
+  return '<svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Πανόραμα της Πόλης" class="">' +
+  '<rect class="sky" width="360" height="130"/>' +
+  '<g class="nstars" fill="#fff"><circle cx="30" cy="20" r="1.2"/><circle cx="90" cy="38" r="1"/><circle cx="150" cy="16" r="1.3"/><circle cx="230" cy="30" r="1"/><circle cx="270" cy="12" r="1.2"/><circle cx="60" cy="60" r="1"/></g>' +
+  '<circle class="sun" cx="322" cy="30" r="14"/>' +
+  '<path class="hillc" d="M0 120 Q25 92 50 108 T100 104 T150 102 T200 104 T250 102 T300 108 T360 106 V135 H0Z"/>' +
+  '<rect class="ground" y="112" width="360" height="88"/>' +
+  '<path d="M0 189 H262" stroke="#cdbb92" stroke-width="5" opacity=".7"/>' +
+  '<path class="sea" d="M258 200 C262 160 276 128 300 118 C320 110 340 112 360 108 V200 Z"/>' +
+  '<g class="wave" fill="none" stroke="#fff" stroke-width="1.4" opacity=".6"><path d="M285 150 q4 -3 8 0 t8 0"/><path d="M310 130 q4 -3 8 0 t8 0"/><path d="M300 170 q4 -3 8 0 t8 0"/></g>' +
+  '<g' + i('ship') + '><path d="M312 142 l12 0 l-3 7 h-7z" fill="#8a5a2b"/><path d="M318 128 v14 M318 129 l9 10 h-9z" stroke="#fff" fill="#fff" stroke-width="1"/></g>' +
+  /* αποβάθρα */
+  '<rect x="270" y="181" width="90" height="8" fill="#a77b4a"/><rect x="274" y="189" width="3" height="8" fill="#7a5530"/><rect x="316" y="189" width="3" height="8" fill="#7a5530"/>' +
+  /* τείχη */
+  '<g' + i('b-walls') + ' class="bld" display="none"><rect x="10" y="122" width="16" height="74" fill="#c9b79c"/><path d="M8 122 h20 v-6 h-4 v3 h-3 v-3 h-4 v3 h-3 v-3 h-2z" fill="#b8a483"/><rect x="5" y="150" width="26" height="46" fill="#bfae92"/><path d="M3 150 h30 v-6 h-5 v3 h-4 v-3 h-6 v3 h-4 v-3 h-5z" fill="#a8977a"/><rect x="14" y="168" width="8" height="14" rx="4" fill="#5a4630"/></g>' +
+  /* ναοί */
+  '<g' + i('b-eirene') + ' class="bld" display="none"><rect x="38" y="126" width="30" height="22" fill="#e8dcc0"/><path d="M40 126 a13 13 0 0 1 26 0z" fill="#b5523b"/><rect x="52" y="104" width="2" height="9" fill="#6b4a2a"/><rect x="49.500" y="106" width="7" height="2" fill="#6b4a2a"/><rect x="50" y="136" width="6" height="12" rx="3" fill="#7a5a3a"/></g>' +
+  '<g' + i('b-sophia') + ' class="bld" display="none"><rect x="82" y="122" width="44" height="26" fill="#efe3c5"/><path d="M86 122 a18 18 0 0 1 36 0z" fill="#a8452f"/><path d="M78 128 a7 7 0 0 1 14 0z M116 128 a7 7 0 0 1 14 0z" fill="#b5523b"/><rect x="103" y="96" width="2" height="9" fill="#6b4a2a"/><rect x="100.500" y="98" width="7" height="2" fill="#6b4a2a"/><rect x="98" y="134" width="12" height="14" rx="6" fill="#7a5a3a"/></g>' +
+  '<g' + i('b-apostles') + ' class="bld" display="none"><rect x="140" y="126" width="34" height="22" fill="#ece0c2"/><rect x="151" y="116" width="12" height="32" fill="#ece0c2"/><path d="M146 126 a11 11 0 0 1 22 0z" fill="#a8452f"/><rect x="156" y="104" width="2" height="9" fill="#6b4a2a"/><rect x="153.500" y="106" width="7" height="2" fill="#6b4a2a"/></g>' +
+  /* παλάτι */
+  '<g' + i('b-palace') + ' class="bld" display="none"><rect x="190" y="124" width="60" height="26" fill="#f0e2c0"/><polygon points="186,124 220,106 254,124" fill="#9c3d2a"/><rect x="192" y="112" width="10" height="14" fill="#e6d4a8"/><rect x="238" y="112" width="10" height="14" fill="#e6d4a8"/><path d="M212 124 a8 8 0 0 1 16 0z" fill="#e0a82e"/><g fill="#7a5a3a"><rect x="196" y="132" width="5" height="8"/><rect x="209" y="132" width="5" height="8"/><rect x="226" y="132" width="5" height="8"/><rect x="239" y="132" width="5" height="8"/></g></g>' +
+  /* φόρουμ */
+  '<g' + i('b-forum') + ' class="bld" display="none"><rect x="32" y="184" width="58" height="6" fill="#d8cfc0"/><g fill="#f1e9d8"><rect x="36" y="162" width="5" height="22"/><rect x="46" y="162" width="5" height="22"/><rect x="56" y="162" width="5" height="22"/><rect x="66" y="162" width="5" height="22"/><rect x="76" y="162" width="5" height="22"/></g><rect x="32" y="156" width="58" height="7" fill="#e0d3b8"/><polygon points="30,157 61,144 92,157" fill="#c8553d"/></g>' +
+  '<g' + i('b-column') + ' class="bld" display="none"><rect x="94" y="184" width="13" height="6" fill="#d8cfc0"/><rect x="97" y="154" width="7" height="31" fill="#ede3cc"/><rect x="94" y="150" width="13" height="5" fill="#d8cfc0"/><circle cx="100.500" cy="143" r="3.500" fill="#e0a82e"/><rect x="98" y="146" width="5" height="5" fill="#e0a82e"/></g>' +
+  '<g' + i('b-cisterns') + ' class="bld" display="none"><rect x="112" y="176" width="36" height="14" fill="#9aa7a5"/><rect x="114" y="172" width="32" height="6" fill="#4aa8e0"/><g fill="#5f6d6b"><path d="M117 190 v-6 a3 3 0 0 1 6 0 v6z M129 190 v-6 a3 3 0 0 1 6 0 v6z M140 190 v-6 a3 3 0 0 1 6 0 v6z"/></g></g>' +
+  '<g' + i('b-hippodrome') + ' class="bld" display="none"><ellipse cx="190" cy="176" rx="36" ry="15" fill="#d9c9a3"/><ellipse cx="190" cy="176" rx="28" ry="10" fill="#c98f5a"/><rect x="174" y="174" width="32" height="3" fill="#8a6a3a"/><rect x="189" y="166" width="2" height="8" fill="#6b4a2a"/></g>' +
+  '<g' + i('b-aqueduct') + ' class="bld" display="none"><rect x="224" y="146" width="38" height="8" fill="#cdbfa3"/><rect x="226" y="148" width="34" height="3" fill="#5fb4e6"/><rect x="224" y="154" width="38" height="36" fill="#cdbfa3"/><path d="M230 190 v-14 a6 6 0 0 1 12 0 v14z M246 190 v-14 a6 6 0 0 1 12 0 v14z" fill="#9cc774"/></g>' +
+  '<g' + i('statues') + ' display="none" fill="#f5f0e6"><circle cx="34" cy="192" r="2.500"/><rect x="32" y="194" width="4" height="4"/><circle cx="62" cy="192" r="2.500"/><rect x="60" y="194" width="4" height="4"/><circle cx="90" cy="192" r="2.500"/><rect x="88" y="194" width="4" height="4"/></g>' +
+  '<g' + i('mess1') + ' display="none"><rect x="116" y="193" width="10" height="7" fill="#a77b4a"/><rect x="127" y="195" width="7" height="5" fill="#8f6538"/></g>' +
+  '<g' + i('mess2') + ' display="none"><rect x="200" y="194" width="18" height="5" fill="#8f6538"/><circle cx="204" cy="198" r="3" fill="none" stroke="#5e3a16" stroke-width="1.5"/><circle cx="215" cy="198" r="3" fill="none" stroke="#5e3a16" stroke-width="1.5"/></g>' +
+  '<g' + i('mess3') + ' display="none" fill="#8a97a3"><ellipse cx="150" cy="44" rx="30" ry="9"/><ellipse cx="168" cy="38" rx="20" ry="9"/><ellipse cx="132" cy="40" rx="16" ry="7"/></g>' +
+  '<g' + i('scaf') + ' class="scaf" display="none"></g>' +
+  '<g' + i('fw') + ' class="fw" display="none"><circle cx="90" cy="40" r="26" fill="none" stroke="#ffd34d" stroke-width="3" stroke-dasharray="3 5"/><circle cx="200" cy="30" r="30" fill="none" stroke="#ff7a5c" stroke-width="3" stroke-dasharray="3 5" style="animation-delay:.5s"/><circle cx="290" cy="52" r="24" fill="none" stroke="#7de0ff" stroke-width="3" stroke-dasharray="3 5" style="animation-delay:1s"/><circle cx="145" cy="70" r="20" fill="none" stroke="#c9a0ff" stroke-width="3" stroke-dasharray="3 5" style="animation-delay:1.3s"/></g>' +
+  '<g' + i('cat') + ' transform="translate(318 164)"><svg class="catwrap" viewBox="0 0 60 48" width="34" height="27" overflow="visible"><use href="#cat"/></svg></g>' +
+  '</svg>';
+}
+function sceneMood(root, phase){
+  const c = root.querySelector('.catwrap'); if (!c) return;
+  c.setAttribute('class', 'catwrap ' + (phase === 'council' ? 'sleep' : phase === 'event' ? 'panic' : ''));
+}
+function renderCity(root, p, s, opts){
+  opts = opts || {};
+  const svg = root.querySelector('svg');
+  svg.classList.toggle('night', !!opts.night);
+  BUILDINGS.forEach(b => { const g = root.querySelector('#' + p + 'b-' + b.id); if (g) g.setAttribute('display', (s.built.includes(b.id) && opts.hide !== b.id) ? '' : 'none'); });
+  root.querySelector('#' + p + 'statues').setAttribute('display', s.statues ? '' : 'none');
+  for (let k = 1; k <= 3; k++) root.querySelector('#' + p + 'mess' + k).setAttribute('display', (s.mess >= k && !opts.night) ? '' : 'none');
+  root.querySelector('#' + p + 'fw').setAttribute('display', opts.fw ? '' : 'none');
+  sceneMood(root, opts.mood || s.phase);
+}
+const ANCH = { walls:[5,116,28,80], forum:[30,142,64,50], column:[92,140,16,52], eirene:[36,102,34,48], sophia:[76,94,56,56], apostles:[138,102,38,48], palace:[184,104,72,48], hippodrome:[152,160,76,34], aqueduct:[222,144,42,48], cisterns:[110,170,40,22] };
+async function scaffoldThenPop(id){
+  const g = $('c-scaf'), a = ANCH[id]; if (!g || !a) return;
+  let h = '<rect x="' + a[0] + '" y="' + a[1] + '" width="' + a[2] + '" height="' + a[3] + '"/>';
+  for (let x = a[0]; x <= a[0] + a[2]; x += 8) h += '<line x1="' + x + '" y1="' + a[1] + '" x2="' + (x + 8) + '" y2="' + (a[1] + a[3]) + '"/>';
+  g.innerHTML = h; g.setAttribute('display', '');
+  await wait(750); g.setAttribute('display', 'none');
+  const b = $('c-b-' + id); if (b){ b.setAttribute('display', ''); b.classList.remove('pop'); void b.getBBox(); b.classList.add('pop'); }
+}
+
+/* ---- κατάσταση εφαρμογής ---- */
+let S = null;           // η εκστρατεία
+let UI = { q: null, fact: null, busy: false, mode: 'campaign', sp: null, view: false };
+function saveGame(){ if (S && S.phase !== 'done' && UI.mode === 'campaign' && !UI.view) LS.set('campaign', S); }
+
+/* ---- αρχική ---- */
+function refreshHome(){
+  const saved = loadState(JSON.stringify(LS.get('campaign', null)));
+  const rb = $('bResume');
+  if (saved){ rb.hidden = false; rb.innerHTML = '▶ Συνέχισε <small>χρονιά ' + YEARS[saved.yi] + ' · 🪙 ' + saved.soldia + '</small>'; } else rb.hidden = true;
+  const stars = LS.get('stars', 0), rec = LS.get('record', 0), best = LS.get('best', 0);
+  $('bSprint').disabled = !stars; $('bView').disabled = !LS.get('city', null);
+  $('recLine').innerHTML = (stars ? 'Καλύτερη εκστρατεία: <b>' + starStr(stars) + '</b> · ' + best + ' πόντοι<br>' : 'Ολοκλήρωσε μία εκστρατεία για να ξεκλειδώσεις την Επιθεώρηση.<br>') + (rec ? 'Ρεκόρ Επιθεώρησης: <b>' + rec + '</b>' : '');
+  const hero = $('heroCity');
+  if (!hero.firstChild){ hero.innerHTML = citySVG('h-'); }
+  const all = { built: BUILDINGS.map(b => b.id), statues: true, mess: 0, phase: 'done' };
+  renderCity(hero, 'h-', all, { mood: 'x' });
+  const cw = hero.querySelector('.catwrap'); if (cw) cw.setAttribute('class', 'catwrap');
+}
+function goHome(){ tStop(); $('pause').hidden = true; saveGame(); UI.view = false; show('home'); refreshHome(); }
+
+/* ---- πλαίσιο παιχνιδιού ---- */
+function mountStage(){ const st = $('stage'); st.innerHTML = citySVG('c-'); }
+function startCampaign(state){
+  S = state; UI = { q: null, fact: null, busy: false, mode: 'campaign', sp: null, view: false };
+  show('game'); mountStage(); render();
+}
+function renderHud(){
+  $('hYear').textContent = YEARS[S.yi] + ' μ.Χ.';
+  $('hDots').innerHTML = YEARS.map((y, i) => '<i class="' + (i <= S.yi ? 'on' : '') + '"></i>').join('');
+  $('hSold').textContent = '🪙 ' + S.soldia; $('hMed').textContent = '🏅 ' + S.medals;
+}
+function P(html){ $('pw').innerHTML = html; $('panel').scrollTop = 0; }
+
+function render(){
+  tStop();
+  renderHud();
+  renderCity($('stage'), 'c-', S, { night: S.phase === 'done', fw: S.phase === 'done' });
+  const ph = S.phase;
+  if (ph === 'council') renderCouncil();
+  else if (ph === 'build') renderBuild();
+  else if (ph === 'event') renderEvent();
+  else if (ph === 'anach') renderAnach();
+  else renderFinal();
+  saveGame();
+}
+
+/* ---- Συμβούλιο ---- */
+function optsHtml(item, perm, picked, done){
+  return perm.map((pi, k) => {
+    let c = 'opt'; if (done){ if (pi === 0) c += ' best'; else if (k === picked) c += ' wrong'; }
+    return '<button class="' + c + '" data-act="pick" data-k="' + k + '"' + (done ? ' disabled' : '') + '>' + (done && pi === 0 ? '✅ ' : '') + item.opts[pi] + '</button>';
+  }).join('');
+}
+function renderCouncil(){
+  const it = currentCouncil(S), perm = orderFor(it.id, S.seed), n = councilItems(S).length;
+  UI.q = { item: it, perm, picked: -1, kind: 'council' };
+  const intro = S.ci === 0 ? '<div class="say">' + catUse(52, 44, 'sleep') + '<div class="bubble">' + YEAR_INTRO[S.yi].t + chTag(YEAR_INTRO[S.yi].ch) + '</div></div>' : '';
+  P(intro + '<div><span class="tag">Συμβούλιο ' + (S.ci + 1) + '/' + n + '</span> ' + chTag(it.ch) + '</div><h2 class="q">' + it.q + '</h2><div id="opts">' + optsHtml(it, perm, -1, false) + '</div><div id="fb"></div>');
+}
+function pickCouncil(k){
+  if (UI.busy || UI.q.picked >= 0) return;
+  const it = UI.q.item; UI.q.picked = k;
+  const wasLast = S.ci + 1 >= councilItems(S).length;
+  const r = answerCouncil(S, k);
+  $('opts').innerHTML = optsHtml(it, UI.q.perm, k, true);
+  r.ok ? sfx.ok() : sfx.bad();
+  const conseq = r.ok ? '' : '<div class="bubble" style="margin-top:6px">' + ['Ένα κάρο χάλασε στην είσοδο — το εργοτάξιο γέμισε κιβώτια.', 'Τα εργαλεία χάθηκαν στα χώματα — ένα κάρο έμεινε στη μέση του δρόμου.', 'Σύννεφα πάνω από την Πόλη· οι τεχνίτες δουλεύουν πιο αργά.'][Math.max(0, S.mess - 1)] + '</div>';
+  $('fb').innerHTML = '<div class="expl">📒 ' + r.ex + chTag(r.ch) + '</div><div class="gain ' + (r.ok ? '' : 'low') + '" style="margin-top:6px">' + (r.ok ? '+' + r.gain + ' σολδία — άριστη απόφαση!' : '+' + r.gain + ' σολδία — όχι η καλύτερη απόφαση.') + '</div>' + conseq +
+    '<button class="btn" style="margin-top:8px" data-act="cnext">' + (wasLast ? 'Στο Εργοτάξιο ▶' : 'Επόμενο ▶') + '</button>';
+  renderHud(); renderCity($('stage'), 'c-', S, {}); saveGame();
+  $('fb').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
+/* ---- Εργοτάξιο ---- */
+function whyNot(s, id){
+  const r = canPlace(s, id);
+  if (r === 'locked') return 'Χτίσε πρώτα: ' + missingPrereqs(s, id).map(x => B[x].name).join(', ');
+  if (r === 'crew') return 'Το συνεργείο έκανε ήδη ' + MAX_BUILDS_PER_YEAR + ' έργα τη χρονιά. Πάμε στην επόμενη!';
+  if (r === 'poor') return 'Χρειάζεσαι ' + buildCost(s, id) + ' σολδία.';
+  return '';
+}
+function renderBuild(){
+  const left = MAX_BUILDS_PER_YEAR - S.placed;
+  const rows = BUILDINGS.map(b => {
+    const r = canPlace(S, b.id), done = S.built.includes(b.id), lost = S.lost.includes(b.id);
+    const cls = done ? 'bl done' : r === 'ok' ? 'bl ok' : 'bl off';
+    const sub = done ? 'Χτισμένο ✓' : (r === 'locked' ? '🔒 ' + missingPrereqs(S, b.id).map(x => B[x].name).join(', ') : (lost ? 'Καταστράφηκε — μισό κόστος' : ''));
+    return '<button class="' + cls + '" data-act="build" data-id="' + b.id + '"><span class="ic">' + b.icon + '</span><span class="nm">' + b.name + (sub ? '<small>' + sub + '</small>' : '') + '</span><span class="co">' + (done ? '' : '🪙 ' + buildCost(S, b.id)) + '</span></button>';
+  }).join('');
+  const fact = UI.fact ? '<div class="fact">💡 <b>Ήξερες ότι…;</b> ' + UI.fact.t + chTag(UI.fact.ch) + '</div>' : '';
+  P('<div class="say">' + catUse(52, 44, '') + '<div class="bubble">Εργοτάξιο ' + YEARS[S.yi] + '. Έχεις <b>🪙 ' + S.soldia + '</b> και <b>' + left + '</b> ' + (left === 1 ? 'θέση' : 'θέσεις') + ' συνεργείου. Πάτα ένα κτίριο για να το χτίσεις.</div></div>' + fact + rows +
+    '<button class="btn gold" data-act="endbuild">' + (S.yi === YEARS.length - 1 ? 'Τα εγκαίνια! 🎆' : 'Τέλος εργασιών ▶ κάρτα απρόοπτου') + '</button>');
+}
+async function doBuild(id){
+  if (UI.busy) return;
+  const why = whyNot(S, id);
+  if (S.built.includes(id)) { toast('Αυτό το κτίριο είναι ήδη χτισμένο ✓'); return; }
+  if (why){ sfx.bad(); toast(why); return; }
+  UI.busy = true;
+  const wasLost = S.lost.includes(id);
+  const r = placeBuilding(S, id); if (!r.ok){ UI.busy = false; return; }
+  UI.fact = r.fact || null;
+  renderHud(); renderCity($('stage'), 'c-', S, { hide: id });
+  sfx.build(); await scaffoldThenPop(id); sfx.ok();
+  UI.busy = false; saveGame(); renderBuild();
+  void wasLost;
+}
+
+/* ---- Κάρτα Απρόοπτου ---- */
+function renderEvent(){
+  const e = EV[S.ev];
+  if (S.evOut) return showEventOutcome(e, S.evOut);
+  sceneMood($('stage'), 'event');
+  P('<div class="evcard back" data-act="draw"><div class="big">❓</div><h3>Κάρτα Απρόοπτου</h3><div>Πάτα για να τραβήξεις!</div></div>');
+}
+function drawCard(){
+  const e = EV[S.ev]; sfx.card();
+  const head = '<div class="evcard"><div class="big">' + e.icon + '</div><h3>' + e.title + '</h3><div style="font-size:14px;line-height:1.4">' + e.text + (e.ch ? chTag(e.ch) : '') + '</div></div>';
+  if (e.type === 'auto'){ P(head + '<button class="btn" data-act="evgo">Δες τι γίνεται ▶</button>'); }
+  else if (e.type === 'task') startFire(head);
+  else startQuiz(head);
+}
+function startFire(head){
+  P(head + '<div class="tmr" id="tmr"><i></i></div><div class="flames" id="fl">' + [0,1,2,3,4,5].map(i => '<button class="flame" data-act="flame" data-i="' + i + '">🔥</button>').join('') + '</div>');
+  UI.fire = 6;
+  tStart(10000, ms => { const t = $('tmr'); if (t){ t.firstChild.style.width = (ms / 100) + '%'; t.classList.toggle('low', ms < 3500); } },
+    () => { finishEvent({ pass: false }); });
+}
+function flameOut(btn){
+  if (btn.classList.contains('out')) return; btn.classList.add('out'); btn.textContent = '💧'; sfx.tap(); UI.fire--;
+  if (UI.fire <= 0){ tStop(); finishEvent({ pass: true }); }
+}
+function finishEvent(res){
+  const e = EV[S.ev]; const out = resolveEvent(S, res); renderHud(); renderCity($('stage'), 'c-', S, { mood: 'event' });
+  showEventOutcome(e, out); saveGame();
+}
+function showEventOutcome(e, out){
+  out.tone === 'good' ? sfx.ok() : out.tone === 'bad' ? sfx.bad() : sfx.tap();
+  P('<div class="evcard ' + (out.tone === 'good' ? 'good' : out.tone === 'bad' ? 'bad' : '') + '"><div class="big">' + (out.medal ? '🏅' : e.icon) + '</div><h3>' + e.title + '</h3><div style="font-size:14px;line-height:1.45">' + out.msg + '</div><div class="gain ' + (out.d < 0 ? 'low' : '') + '">' + (out.d > 0 ? '+' + out.d : out.d < 0 ? out.d : '±0') + ' σολδία</div></div>' +
+    (e.type === 'task' || e.type === 'quiz' ? '' : '') + '<button class="btn" data-act="evnext">Συνέχεια ▶</button>');
+}
+function startQuiz(head){
+  UI.qz = { i: 0, n: 0 }; quizQ(head);
+}
+function quizQ(head){
+  const id = S.evq[UI.qz.i], it = ITEMS[id], perm = quizOrder(S, id, UI.qz.i);
+  UI.q = { item: it, perm, picked: -1, kind: 'quiz' };
+  P((head || '') + '<div><span class="tag">Επιθεώρηση ' + (UI.qz.i + 1) + '/3</span> ' + chTag(it.ch) + '</div><h2 class="q">' + it.q + '</h2><div id="opts">' + optsHtml(it, perm, -1, false) + '</div><div id="fb"></div>');
+}
+function pickQuiz(k){
+  if (UI.q.picked >= 0) return; const it = UI.q.item; UI.q.picked = k;
+  const ok = UI.q.perm[k] === 0; if (ok) UI.qz.n++;
+  $('opts').innerHTML = optsHtml(it, UI.q.perm, k, true); ok ? sfx.ok() : sfx.bad();
+  const last = UI.qz.i >= 2;
+  $('fb').innerHTML = '<div class="expl">📒 ' + it.ex + chTag(it.ch) + '</div><button class="btn" style="margin-top:8px" data-act="qnext">' + (last ? 'Δες το αποτέλεσμα ▶' : 'Επόμενη ▶') + '</button>';
+}
+function afterQuizStep(){
+  UI.qz.i++;
+  if (UI.qz.i >= 3) finishEvent({ n: UI.qz.n }); else quizQ('');
+}
+function evNext(){
+  afterEvent(S);
+  if (S.phase === 'anach'){ render(); } else { UI.fact = null; render(); }
+}
+
+/* ---- Τι δεν ταιριάζει; ---- */
+function renderAnach(){
+  const sc = SCENES[S.scene];
+  UI.an = { wrong: 0, done: false };
+  const st = $('stage');
+  let h = '<svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg" id="sceneSvg"><rect class="sky" width="360" height="200"/><circle class="sun" cx="322" cy="28" r="13"/><path class="hillc" d="M0 96 Q60 70 120 90 T240 88 T360 84 V200 H0Z"/><rect class="ground" y="94" width="360" height="106"/><path class="sea" d="M258 200 C262 160 276 128 300 118 C320 110 340 112 360 108 V200 Z" opacity=".55"/>' +
+    '<g fill="#efe3c5"><rect x="8" y="40" width="10" height="70"/><rect x="342" y="40" width="10" height="70"/><rect x="4" y="34" width="18" height="8" fill="#d8cfc0"/><rect x="338" y="34" width="18" height="8" fill="#d8cfc0"/></g>';
+  sc.props.forEach((p, i) => {
+    h += '<g class="sprop" data-act="spick" data-i="' + i + '"><circle cx="' + p.x + '" cy="' + p.y + '" r="23" fill="rgba(255,255,255,.001)"/><text x="' + p.x + '" y="' + (p.y + 9) + '" font-size="' + (p.e.length > 3 ? 24 : 30) + '" text-anchor="middle">' + p.e + '</text></g>';
+  });
+  h += '</svg>';
+  st.innerHTML = h;
+  P('<div class="say">' + catUse(52, 44, '') + '<div class="bubble"><b>Τι δεν ταιριάζει;</b> ' + sc.title + ': ένα αντικείμενο δεν υπήρχε στην εποχή του Κωνσταντίνου. Βρες το σε 15″ για +' + ANACH_BONUS + ' σολδία!</div></div><div class="tmr" id="tmr"><i></i></div><div id="anr"></div><button class="btn ghost" data-act="askip">Παράλειψη</button>');
+  tStart(15000, ms => { const t = $('tmr'); if (t){ t.firstChild.style.width = (ms / 150) + '%'; t.classList.toggle('low', ms < 5000); } }, () => endAnach(false, true));
+}
+function endAnach(found, timeout){
+  if (UI.an.done) return; UI.an.done = true; tStop();
+  const sc = SCENES[S.scene];
+  const idx = sc.props.findIndex(p => p.ana);
+  document.querySelectorAll('.sprop').forEach(g => { const i = +g.dataset.i; if (i === idx) g.classList.add(found ? 'found' : 'reveal'); });
+  found ? sfx.win() : sfx.bad();
+  $('anr').innerHTML = '<div class="expl">' + (found ? '🎉 Μπράβο! ' : (timeout ? '⏱ Ο χρόνος τελείωσε. ' : 'Ήταν αυτό: ') ) + sc.why + '</div><div class="gain ' + (found ? '' : 'low') + '" style="margin-top:6px">' + (found ? '+' + ANACH_BONUS + ' σολδία' : 'Χωρίς μπόνους — την επόμενη φορά!') + '</div><button class="btn" style="margin-top:8px" data-act="anext" data-f="' + (found ? 1 : 0) + '">Επόμενη χρονιά ▶</button>';
+  document.querySelector('[data-act=askip]').hidden = true;
+}
+function pickScene(i, g){
+  if (UI.an.done) return; const sc = SCENES[S.scene];
+  if (sc.props[i].ana) return endAnach(true, false);
+  UI.an.wrong++; sfx.bad(); g.classList.remove('shake'); void g.getBoundingClientRect(); g.classList.add('shake');
+  toast(UI.an.wrong >= 3 ? 'Ψάξε καλά — ποιο δεν έχει θέση στο 330 μ.Χ.;' : 'Αυτό υπήρχε τότε! Ψάξε ξανά.');
+}
+function anachNext(found){
+  resolveScene(S, !!found); mountStage(); render();
+}
+
+/* ---- Εγκαίνια ---- */
+function renderFinal(){
+  const f = S.final; const first = !UI.finalSaved;
+  if (first && UI.mode === 'campaign' && !UI.view){
+    UI.finalSaved = true; LS.del('campaign');
+    if (f.stars > LS.get('stars', 0)) LS.set('stars', f.stars);
+    if (f.score > LS.get('best', 0)) LS.set('best', f.score);
+    LS.set('city', { built: S.built, statues: S.statues, stars: f.stars, score: f.score, medals: S.medals });
+    sfx.win();
+  }
+  sceneMood($('stage'), 'x');
+  const complete = Math.round(S.built.length / BUILDINGS.length * 100);
+  P('<div class="evcard good"><div class="big">🎆</div><h3>Τα εγκαίνια! Μάιος 330 μ.Χ.</h3><div style="font-size:14px">Η Νέα Ρώμη είναι έτοιμη — η Πόλη σου!</div><div class="stars">' + starStr(f.stars) + '</div></div>' +
+    '<div class="stats"><div class="stat">Πόντοι<b>' + f.score + '</b></div><div class="stat">Κτίρια<b>' + S.built.length + '/' + BUILDINGS.length + ' (' + complete + '%)</b></div><div class="stat">Σολδία<b>🪙 ' + S.soldia + '</b></div><div class="stat">Μετάλλια<b>🏅 ' + S.medals + '</b></div></div>' +
+    '<div class="expl">📒 Τα εγκαίνια της Πόλης έγιναν τον Μάιο του 330 (κεφ. 7). Δες τι θα γίνει μετά:</div>' +
+    '<div class="epi"><div><b>337</b> Ο Κωνσταντίνος πεθαίνει και θάβεται στους Αγίους Αποστόλους <span class="tag ch">κεφ. 7</span></div><div><b>395</b> Ο Θεοδόσιος χωρίζει την αυτοκρατορία: ο Αρκάδιος παίρνει την Ανατολή, ο Ονώριος τη Δύση <span class="tag ch">κεφ. 9</span></div><div><b>476</b> Η Δυτική Αυτοκρατορία διαλύεται <span class="tag ch">κεφ. 9</span></div><div>…μα η Πόλη σου θα ζήσει χίλια χρόνια ακόμη! 🏛️</div></div>' +
+    (UI.view ? '' : '<button class="btn gold" data-act="newgame">Νέα εκστρατεία</button>') + '<button class="btn ghost" data-act="sprintgo">⚡ Γρήγορη Επιθεώρηση</button><button class="btn ghost" data-act="home">Αρχική</button>');
+}
+function viewCity(){
+  const c = LS.get('city', null); if (!c) return;
+  S = Object.assign(newGame(1), { phase: 'done', built: c.built, statues: !!c.statues, medals: c.medals || 0, yi: 6, final: { score: c.score, stars: c.stars } });
+  UI = { q: null, fact: null, busy: false, mode: 'campaign', sp: null, view: true, finalSaved: true };
+  show('game'); mountStage(); render();
+}
+
+/* ---- Γρήγορη Επιθεώρηση ---- */
+function startSprint(){
+  tStop(); UI = { q: null, fact: null, busy: false, mode: 'sprint', sp: newSprint(), view: false, left: SPRINT_SECONDS, pending: false };
+  show('game'); mountStage();
+  S = newGame(1); S.yi = 0; S.built = BUILDINGS.map(b => b.id); S.statues = true; renderCity($('stage'), 'c-', S, { mood: 'x' }); S.built = [];
+  $('hYear').textContent = 'Γρήγορη Επιθεώρηση'; $('hDots').innerHTML = ''; $('hSold').textContent = '⏱ ' + SPRINT_SECONDS + '″'; $('hMed').textContent = '✔ 0';
+  nextSprintQ();
+  tStart(SPRINT_SECONDS * 1000, ms => { $('hSold').textContent = '⏱ ' + Math.ceil(ms / 1000) + '″'; const t = $('tmr'); if (t){ t.firstChild.style.width = (ms / (SPRINT_SECONDS * 10)) + '%'; t.classList.toggle('low', ms < 15000); } }, endSprint);
+}
+function nextSprintQ(){
+  const q = sprintQuestion(UI.sp); UI.q = { item: q.item, perm: q.perm, picked: -1, kind: 'sprint' };
+  P('<div class="tmr" id="tmr"><i></i></div><div>' + chTag(q.item.ch) + '</div><h2 class="q">' + q.item.q + '</h2><div id="opts">' + optsHtml(q.item, q.perm, -1, false) + '</div><div id="fb"></div>');
+}
+function pickSprint(k){
+  if (UI.q.picked >= 0) return; UI.q.picked = k; const it = UI.q.item; const ok = UI.q.perm[k] === 0;
+  $('opts').innerHTML = optsHtml(it, UI.q.perm, k, true);
+  if (ok){ UI.sp.score++; sfx.ok(); $('hMed').textContent = '✔ ' + UI.sp.score; setTimeout(() => { if (UI.mode === 'sprint' && T.id) nextSprintQ(); }, 450); }
+  else { UI.sp.wrong++; sfx.bad(); T.paused = true; $('fb').innerHTML = '<div class="expl">📒 ' + it.ex + chTag(it.ch) + '</div><button class="btn" style="margin-top:8px" data-act="spnext">Συνέχεια ▶</button>'; }
+}
+function endSprint(){
+  tStop(); const sc = UI.sp.score, rec = LS.get('record', 0), nr = sc > rec; if (nr) LS.set('record', sc); sfx.win();
+  P('<div class="evcard good"><div class="big">⚡</div><h3>Τέλος χρόνου!</h3><div style="font-size:30px;font-weight:700">' + sc + ' σωστές</div><div>' + (nr ? '🎉 Νέο ρεκόρ!' : 'Ρεκόρ: ' + Math.max(rec, sc)) + '</div></div><button class="btn gold" data-act="sprintgo">Ξανά! ⚡</button><button class="btn ghost" data-act="home">Αρχική</button>');
+}
+
+/* ---- χειριστές ---- */
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-act]'); if (!el) return;
+  const a = el.dataset.act;
+  if (a !== 'flame') sfx.tap();
+  switch (a) {
+    case 'pick': if (UI.q.kind === 'council') pickCouncil(+el.dataset.k); else if (UI.q.kind === 'quiz') pickQuiz(+el.dataset.k); else if (UI.q.kind === 'sprint') pickSprint(+el.dataset.k); break;
+    case 'cnext': UI.fact = null; render(); break;
+    case 'build': doBuild(el.dataset.id); break;
+    case 'endbuild': if (UI.busy) break; endBuild(S); UI.fact = null; mountStage(); render(); break;
+    case 'draw': drawCard(); break;
+    case 'evgo': finishEvent({}); break;
+    case 'flame': flameOut(el); break;
+    case 'qnext': afterQuizStep(); break;
+    case 'evnext': evNext(); break;
+    case 'spick': pickScene(+el.dataset.i, el); break;
+    case 'askip': endAnach(false, false); break;
+    case 'anext': anachNext(+el.dataset.f); break;
+    case 'spnext': T.last = performance.now(); T.paused = false; nextSprintQ(); break;
+    case 'sprintgo': startSprint(); break;
+    case 'newgame': newCampaign(); break;
+    case 'home': goHome(); break;
+  }
+});
+function newCampaign(){ LS.del('campaign'); startCampaign(newGame()); }
+$('bNew').addEventListener('click', () => { if (LS.get('campaign', null) && !confirm('Η αποθηκευμένη εκστρατεία θα χαθεί. Νέα εκστρατεία;')) return; newCampaign(); });
+$('bResume').addEventListener('click', () => { const s = loadState(JSON.stringify(LS.get('campaign', null))); if (s) startCampaign(s); });
+$('bSprint').addEventListener('click', startSprint);
+$('bView').addEventListener('click', viewCity);
+$('bHome').addEventListener('click', goHome);
+$('bSnd').addEventListener('click', toggleSnd); $('bSound').addEventListener('click', toggleSnd);
+
+setSnd(); refreshHome();
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('./sw.js').catch(() => {});
+window.__poli = { get S(){ return S; }, get UI(){ return UI; } };
+})();
+</script>
+<script src="../feedback.js" data-fb-corner="br" defer></script>
+</body>
+</html>
